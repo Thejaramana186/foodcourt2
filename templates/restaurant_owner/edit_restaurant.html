@@ -1,0 +1,106 @@
+{% extends "restaurant_owner/base.html" %}
+
+{% block title %}Edit Restaurant - Restaurant Owner{% endblock %}
+{% block page_title %}Edit Restaurant{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card shadow">
+            <div class="card-header">
+                <h5 class="mb-0">Edit Restaurant Information</h5>
+            </div>
+            <div class="card-body">
+                <form method="POST">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="name" class="form-label">Restaurant Name *</label>
+                            <input type="text" class="form-control" id="name" name="name" 
+                                   value="{{ restaurant.name }}" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="cuisine" class="form-label">Cuisine Type *</label>
+                            <input type="text" class="form-control" id="cuisine" name="cuisine" 
+                                   value="{{ restaurant.cuisine }}" required>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="description" class="form-label">Description</label>
+                        <textarea class="form-control" id="description" name="description" rows="3">{{ restaurant.description or '' }}</textarea>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-8 mb-3">
+                            <label for="address" class="form-label">Address *</label>
+                            <input type="text" class="form-control" id="address" name="address" 
+                                   value="{{ restaurant.address }}" required>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label for="city" class="form-label">City *</label>
+                            <input type="text" class="form-control" id="city" name="city" 
+                                   value="{{ restaurant.city }}" required>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="phone" class="form-label">Phone Number *</label>
+                            <input type="tel" class="form-control" id="phone" name="phone" 
+                                   value="{{ restaurant.phone }}" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="email" class="form-label">Email</label>
+                            <input type="email" class="form-control" id="email" name="email" 
+                                   value="{{ restaurant.email or '' }}">
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label for="type" class="form-label">Service Type</label>
+                            <select class="form-select" id="type" name="type">
+                                <option value="both" {{ 'selected' if restaurant.type == 'both' else '' }}>Dine-in & Delivery</option>
+                                <option value="dine_in" {{ 'selected' if restaurant.type == 'dine_in' else '' }}>Dine-in Only</option>
+                                <option value="delivery" {{ 'selected' if restaurant.type == 'delivery' else '' }}>Delivery Only</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label for="opening_time" class="form-label">Opening Time</label>
+                            <input type="time" class="form-control" id="opening_time" name="opening_time" 
+                                   value="{{ restaurant.opening_time or '' }}">
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label for="closing_time" class="form-label">Closing Time</label>
+                            <input type="time" class="form-control" id="closing_time" name="closing_time" 
+                                   value="{{ restaurant.closing_time or '' }}">
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="delivery_fee" class="form-label">Delivery Fee ($)</label>
+                            <input type="number" class="form-control" id="delivery_fee" name="delivery_fee" 
+                                   min="0" step="0.01" value="{{ restaurant.delivery_fee or 0 }}">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="minimum_order" class="form-label">Minimum Order ($)</label>
+                            <input type="number" class="form-control" id="minimum_order" name="minimum_order" 
+                                   min="0" step="0.01" value="{{ restaurant.minimum_order or 0 }}">
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-between">
+                        <a href="{{ url_for('restaurant_owner.restaurants') }}" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left me-2"></i>Back to Restaurants
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save me-2"></i>Update Restaurant
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

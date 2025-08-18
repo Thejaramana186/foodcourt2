@@ -1,0 +1,209 @@
+{% extends "restaurant_owner/base.html" %}
+
+{% block title %}Orders - Restaurant Owner{% endblock %}
+{% block page_title %}Orders Management{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Orders</h2>
+    <div class="d-flex gap-2">
+        <!-- Restaurant Filter -->
+        <select class="form-select" id="restaurantFilter" onchange="filterOrders()">
+            <option value="">All Restaurants</option>
+            {% for restaurant in restaurants %}
+            <option value="{{ restaurant.id }}" {{ 'selected' if selected_restaurant == restaurant.id else '' }}>
+                {{ restaurant.name }}
+            </option>
+            {% endfor %}
+        </select>
+        
+        <!-- Status Filter -->
+        <select class="form-select" id="statusFilter" onchange="filterOrders()">
+            <option value="">All Status</option>
+            <option value="pending" {{ 'selected' if status_filter == 'pending' else '' }}>Pending</option>
+            <option value="confirmed" {{ 'selected' if status_filter == 'confirmed' else '' }}>Confirmed</option>
+            <option value="preparing" {{ 'selected' if status_filter == 'preparing' else '' }}>Preparing</option>
+            <option value="ready_for_pickup" {{ 'selected' if status_filter == 'ready_for_pickup' else '' }}>Ready for Pickup</option>
+            <option value="completed" {{ 'selected' if status_filter == 'completed' else '' }}>Completed</option>
+        </select>
+    </div>
+</div>
+
+{% if orders %}
+    {% if orders.items %}
+        <div class="card shadow">
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Order ID</th>
+                                <th>Customer</th>
+                                <th>Restaurant</th>
+                                <th>Items</th>
+                                <th>Total</th>
+                                <th>Status</th>
+                                <th>Date</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for order in orders.items %}
+                            <tr>
+                                <td><strong>#{{ order.id }}</strong></td>
+                                <td>
+                                    {{ order.customer.name if order.customer else 'N/A' }}<br>
+                                    <small class="text-muted">{{ order.customer.phone if order.customer else '' }}</small>
+                                </td>
+                                <td>{{ order.restaurant.name if order.restaurant else 'N/A' }}</td>
+                                <td>
+                                    {% if order.order_items %}
+                                        {% for item in order.order_items[:2] %}
+                                            <small>{{ item.menu.name }} ({{ item.quantity }})</small><br>
+                                        {% endfor %}
+                                        {% if order.order_items|length > 2 %}
+                                            <small class="text-muted">+{{ order.order_items|length - 2 }} more</small>
+                                        {% endif %}
+                                    {% else %}
+                                        <small class="text-muted">No items</small>
+                                    {% endif %}
+                                </td>
+                                <td><strong>${{ "%.2f"|format(order.total_amount) }}</strong></td>
+                                <td>
+                                    <span class="badge bg-{{ 
+                                        'success' if order.status == 'completed' 
+                                        else 'primary' if order.status == 'confirmed' 
+                                        else 'info' if order.status == 'preparing' 
+                                        else 'warning' if order.status == 'ready_for_pickup' 
+                                        else 'secondary' 
+                                    }}">
+                                        {{ order.status.replace('_', ' ').title() }}
+                                    </span>
+                                </td>
+                                <td>
+                                    {{ order.created_at.strftime('%Y-%m-%d %H:%M') if order.created_at else 'N/A' }}
+                                </td>
+                                <td>
+                                    {% if order.status in ['pending', 'confirmed', 'preparing'] %}
+                                    <div class="btn-group" role="group">
+                                        {% if order.status == 'pending' %}
+                                        <button class="btn btn-sm btn-success" onclick="updateOrderStatus({{ order.id }}, 'confirmed')">
+                                            Confirm
+                                        </button>
+                                        {% elif order.status == 'confirmed' %}
+                                        <button class="btn btn-sm btn-info" onclick="updateOrderStatus({{ order.id }}, 'preparing')">
+                                            Start Preparing
+                                        </button>
+                                        {% elif order.status == 'preparing' %}
+                                        <button class="btn btn-sm btn-warning" onclick="updateOrderStatus({{ order.id }}, 'ready_for_pickup')">
+                                            Ready
+                                        </button>
+                                        {% endif %}
+                                    </div>
+                                    {% else %}
+                                    <span class="text-muted">No actions</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pagination -->
+        {% if orders.pages > 1 %}
+        <nav aria-label="Orders pagination" class="mt-4">
+            <ul class="pagination justify-content-center">
+                {% if orders.has_prev %}
+                    <li class="page-item">
+                        <a class="page-link" href="{{ url_for('restaurant_owner.orders', page=orders.prev_num, status=status_filter, restaurant_id=selected_restaurant) }}">Previous</a>
+                    </li>
+                {% endif %}
+                
+                {% for page_num in orders.iter_pages() %}
+                    {% if page_num %}
+                        {% if page_num != orders.page %}
+                            <li class="page-item">
+                                <a class="page-link" href="{{ url_for('restaurant_owner.orders', page=page_num, status=status_filter, restaurant_id=selected_restaurant) }}">{{ page_num }}</a>
+                            </li>
+                        {% else %}
+                            <li class="page-item active">
+                                <span class="page-link">{{ page_num }}</span>
+                            </li>
+                        {% endif %}
+                    {% else %}
+                        <li class="page-item disabled">
+                            <span class="page-link">...</span>
+                        </li>
+                    {% endif %}
+                {% endfor %}
+                
+                {% if orders.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="{{ url_for('restaurant_owner.orders', page=orders.next_num, status=status_filter, restaurant_id=selected_restaurant) }}">Next</a>
+                    </li>
+                {% endif %}
+            </ul>
+        </nav>
+        {% endif %}
+    {% else %}
+        <div class="text-center py-5">
+            <i class="fas fa-shopping-cart fa-3x text-muted mb-3"></i>
+            <h4>No Orders Found</h4>
+            <p class="text-muted">No orders match your current filters.</p>
+        </div>
+    {% endif %}
+{% else %}
+    <div class="text-center py-5">
+        <i class="fas fa-shopping-cart fa-3x text-muted mb-3"></i>
+        <h4>No Orders Yet</h4>
+        <p class="text-muted">You haven't received any orders yet.</p>
+    </div>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script>
+function filterOrders() {
+    const restaurantId = document.getElementById('restaurantFilter').value;
+    const status = document.getElementById('statusFilter').value;
+    
+    const params = new URLSearchParams();
+    if (restaurantId) params.append('restaurant_id', restaurantId);
+    if (status) params.append('status', status);
+    
+    window.location.href = '{{ url_for("restaurant_owner.orders") }}?' + params.toString();
+}
+
+function updateOrderStatus(orderId, newStatus) {
+    if (!confirm('Are you sure you want to update this order status?')) {
+        return;
+    }
+    
+    fetch(`{{ url_for('restaurant_owner.update_order_status', order_id=0) }}`.replace('0', orderId), {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            status: newStatus
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.message) {
+            alert('Order status updated successfully!');
+            location.reload();
+        } else {
+            alert('Error: ' + (data.error || 'Failed to update order status'));
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('An error occurred while updating the order status');
+    });
+}
+</script>
+{% endblock %}

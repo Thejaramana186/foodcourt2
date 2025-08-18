@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FoodieHub - Premium Food Delivery Experience</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+</head>
+<body class="bg-gray-50">
+    <!-- Navigation -->
+    <nav class="bg-white shadow-xl sticky top-0 z-50 border-b border-gray-100">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-20">
+                <div class="flex items-center">
+                    <a href="{{ url_for('public.index') }}" class="flex items-center space-x-3">
+                        <div class="w-12 h-12 bg-gradient-to-br from-red-500 via-orange-500 to-pink-500 rounded-2xl flex items-center justify-center shadow-lg">
+                            <i class="fas fa-utensils text-white text-xl"></i>
+                        </div>
+                        <span class="text-3xl font-black bg-gradient-to-r from-red-500 to-pink-500 bg-clip-text text-transparent">FoodieHub</span>
+                    </a>
+                </div>
+                
+                <div class="hidden md:flex items-center space-x-8">
+                    <a href="{{ url_for('public.index') }}" class="text-red-600 font-semibold border-b-2 border-red-500 pb-1">Home</a>
+                    <a href="{{ url_for('public.restaurants') }}" class="text-gray-700 hover:text-red-600 font-medium transition duration-300">Restaurants</a>
+                    <a href="{{ url_for('public.about') }}" class="text-gray-700 hover:text-red-600 font-medium transition duration-300">About</a>
+                    <a href="{{ url_for('public.contact') }}" class="text-gray-700 hover:text-red-600 font-medium transition duration-300">Contact</a>
+                </div>
+                
+                <div class="flex items-center space-x-4">
+                    <a href="{{ url_for('auth.login') }}" class="text-gray-700 hover:text-red-600 font-medium transition duration-300">Sign In</a>
+                    <a href="{{ url_for('auth.register') }}" class="bg-gradient-to-r from-red-500 via-orange-500 to-pink-500 text-white px-6 py-3 rounded-2xl font-semibold hover:shadow-lg transform hover:scale-105 transition duration-300">
+                        Join Now
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="relative bg-gradient-to-br from-red-500 via-orange-500 to-pink-600 py-24 overflow-hidden min-h-screen flex items-center">
+        <div class="absolute inset-0 bg-black opacity-20"></div>
+        
+        <!-- Animated background elements -->
+        <div class="absolute inset-0 overflow-hidden">
+            <div class="absolute -top-20 -left-20 w-80 h-80 bg-white opacity-10 rounded-full animate-pulse"></div>
+            <div class="absolute top-32 right-32 w-64 h-64 bg-yellow-300 opacity-20 rounded-full animate-bounce" style="animation-duration: 3s;"></div>
+            <div class="absolute bottom-32 left-1/3 w-48 h-48 bg-blue-400 opacity-15 rounded-full animate-pulse" style="animation-delay: 1s;"></div>
+        </div>
+        
+        <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center z-10">
+            <div class="animate-fade-in">
+                <h1 class="text-6xl md:text-8xl font-black text-white mb-8 leading-tight">
+                    Craving Something
+                    <span class="block bg-gradient-to-r from-yellow-300 via-pink-300 to-purple-300 bg-clip-text text-transparent">
+                        Delicious?
+                    </span>
+                </h1>
+                <p class="text-xl md:text-2xl text-white mb-12 max-w-4xl mx-auto opacity-95 leading-relaxed">
+                    Experience gourmet dining at home with our premium food delivery service. 
+                    Fresh ingredients, expert chefs, lightning-fast delivery - all in one place! 🍽️
+                </p>
+                <div class="flex flex-col sm:flex-row gap-6 justify-center items-center mb-16">
+                    <a href="{{ url_for('public.restaurants') }}" 
+                       class="group bg-white text-red-600 px-10 py-5 rounded-2xl font-bold text-xl hover:bg-gray-100 transform hover:scale-105 transition duration-300 shadow-2xl flex items-center space-x-3">
+                        <i class="fas fa-utensils text-2xl group-hover:rotate-12 transition duration-300"></i>
+                        <span>Order Now</span>
+                        <i class="fas fa-arrow-right group-hover:translate-x-1 transition duration-300"></i>
+                    </a>
+                    <a href="{{ url_for('auth.register') }}" 
+                       class="group border-3 border-white text-white px-10 py-5 rounded-2xl font-bold text-xl hover:bg-white hover:text-red-600 transform hover:scale-105 transition duration-300 flex items-center space-x-3">
+                        <i class="fas fa-star text-xl group-hover:rotate-180 transition duration-500"></i>
+                        <span>Join Premium</span>
+                    </a>
+                </div>
+                
+                <!-- Trust indicators -->
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-8 mt-16">
+                    <div class="text-center">
+                        <div class="text-4xl font-black text-white mb-2">4.9★</div>
+                        <div class="text-white opacity-80">Customer Rating</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-4xl font-black text-white mb-2">15min</div>
+                        <div class="text-white opacity-80">Avg Delivery</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-4xl font-black text-white mb-2">50K+</div>
+                        <div class="text-white opacity-80">Happy Customers</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-4xl font-black text-white mb-2">24/7</div>
+                        <div class="text-white opacity-80">Service</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="py-20 bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-20">
+                <h2 class="text-5xl font-black bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-6">Why Choose FoodieHub?</h2>
+                <p class="text-2xl text-gray-700 max-w-4xl mx-auto leading-relaxed">
+                    We're not just another food delivery app. We're your culinary adventure partner! 🚀
+                </p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-10">
+                <div class="group text-center p-10 rounded-3xl bg-gradient-to-br from-blue-500 via-purple-500 to-indigo-600 text-white hover:shadow-2xl transform hover:scale-105 transition duration-500">
+                    <div class="w-24 h-24 bg-white bg-opacity-20 rounded-3xl flex items-center justify-center mx-auto mb-8 backdrop-blur-sm group-hover:rotate-12 transition duration-500">
+                        <i class="fas fa-rocket text-4xl text-white"></i>
+                    </div>
+                    <h3 class="text-3xl font-bold mb-6">Lightning Fast ⚡</h3>
+                    <p class="text-lg opacity-90 leading-relaxed">Average delivery in just 15-30 minutes! Our delivery team ensures your food arrives hot and fresh.</p>
+                </div>
+                
+                <div class="group text-center p-10 rounded-3xl bg-gradient-to-br from-green-500 via-teal-500 to-emerald-600 text-white hover:shadow-2xl transform hover:scale-105 transition duration-500">
+                    <div class="w-24 h-24 bg-white bg-opacity-20 rounded-3xl flex items-center justify-center mx-auto mb-8 backdrop-blur-sm group-hover:rotate-12 transition duration-500">
+                        <i class="fas fa-shield-alt text-4xl text-white"></i>
+                    </div>
+                    <h3 class="text-3xl font-bold mb-6">100% Safe 🛡️</h3>
+                    <p class="text-lg opacity-90 leading-relaxed">Contactless delivery, highest hygiene standards, and temperature-controlled transport for your safety.</p>
+                </div>
+                
+                <div class="group text-center p-10 rounded-3xl bg-gradient-to-br from-yellow-400 via-orange-500 to-red-500 text-white hover:shadow-2xl transform hover:scale-105 transition duration-500">
+                    <div class="w-24 h-24 bg-white bg-opacity-20 rounded-3xl flex items-center justify-center mx-auto mb-8 backdrop-blur-sm group-hover:rotate-12 transition duration-500">
+                        <i class="fas fa-crown text-4xl text-white"></i>
+                    </div>
+                    <h3 class="text-3xl font-bold mb-6">Premium Quality 👑</h3>
+                    <p class="text-lg opacity-90 leading-relaxed">Partnered with award-winning restaurants and top chefs to bring you restaurant-quality meals.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Featured Restaurants -->
+    {% if restaurants %}
+    <section class="py-20 bg-gradient-to-br from-purple-50 via-pink-50 to-indigo-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-20">
+                <h2 class="text-5xl font-black bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent mb-6">Featured Restaurants ⭐</h2>
+                <p class="text-2xl text-gray-700">Handpicked by our food experts, loved by our community</p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                {% for restaurant in restaurants %}
+                <div class="group bg-white rounded-3xl shadow-xl overflow-hidden hover:shadow-2xl transform hover:scale-105 transition duration-500 border border-gray-100">
+                    <div class="relative overflow-hidden">
+                        <img src="{{ restaurant.image }}" alt="{{ restaurant.name }}" 
+                             class="w-full h-56 object-cover group-hover:scale-110 transition duration-500">
+                        <div class="absolute top-4 left-4 bg-gradient-to-r from-yellow-400 to-orange-500 text-white px-4 py-2 rounded-2xl text-sm font-bold shadow-xl">
+                            <i class="fas fa-star mr-1"></i>{{ restaurant.rating }}
+                        </div>
+                        <div class="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-0 group-hover:opacity-60 transition duration-500"></div>
+                        <div class="absolute bottom-4 left-4 right-4 opacity-0 group-hover:opacity-100 transition duration-500">
+                            <a href="{{ url_for('public.restaurant_detail', restaurant_id=restaurant.id) }}" 
+                               class="block w-full bg-white text-red-600 py-3 rounded-2xl font-bold text-center hover:bg-red-600 hover:text-white transition duration-300">
+                                View Menu
+                            </a>
+                        </div>
+                    </div>
+                    <div class="p-8">
+                        <h3 class="text-2xl font-bold text-gray-900 mb-3 group-hover:text-red-600 transition duration-300">{{ restaurant.name }}</h3>
+                        <p class="text-gray-600 mb-4 text-lg">{{ restaurant.cuisine }}</p>
+                        <div class="flex items-center justify-between mb-6">
+                            <span class="text-sm text-gray-500 flex items-center bg-gray-100 px-3 py-2 rounded-xl">
+                                <i class="fas fa-clock mr-2 text-orange-500"></i>{{ restaurant.delivery_time }}
+                            </span>
+                            <span class="text-sm text-green-600 font-bold bg-green-100 px-3 py-2 rounded-xl">
+                                <i class="fas fa-shipping-fast mr-1"></i>Free Delivery
+                            </span>
+                        </div>
+                        <a href="{{ url_for('public.restaurant_detail', restaurant_id=restaurant.id) }}" 
+                           class="w-full bg-gradient-to-r from-red-500 via-orange-500 to-pink-500 text-white py-4 rounded-2xl font-bold hover:shadow-lg transform hover:scale-105 transition duration-300 text-center block">
+                            <i class="fas fa-utensils mr-2"></i>Order Now
+                        </a>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            
+            <div class="text-center mt-16">
+                <a href="{{ url_for('public.restaurants') }}" 
+                   class="bg-gradient-to-r from-purple-600 via-blue-600 to-indigo-600 text-white px-12 py-5 rounded-2xl font-bold text-xl hover:shadow-lg transform hover:scale-105 transition duration-300 inline-flex items-center space-x-3">
+                    <span>Explore All Restaurants</span>
+                    <i class="fas fa-arrow-right"></i>
+                </a>
+            </div>
+        </div>
+    </section>
+    {% endif %}
+
+    <!-- Multi-Platform CTA -->
+    <section class="py-20 bg-gradient-to-r from-red-600 via-orange-500 to-pink-600 relative overflow-hidden">
+        <div class="absolute inset-0">
+            <div class="absolute top-10 left-10 w-32 h-32 bg-white opacity-10 rounded-full animate-pulse"></div>
+            <div class="absolute bottom-10 right-10 w-40 h-40 bg-yellow-300 opacity-20 rounded-full animate-bounce"></div>
+        </div>
+        
+        <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 z-10">
+            <div class="text-center mb-16">
+                <h2 class="text-5xl md:text-7xl font-black text-white mb-6">Join Our Community! 🌟</h2>
+                <p class="text-2xl text-white mb-12 opacity-95 max-w-3xl mx-auto leading-relaxed">
+                    Whether you're a food lover, restaurant owner, or delivery partner - there's a place for you!
+                </p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <!-- Customer -->
+                <div class="bg-white bg-opacity-90 backdrop-blur-lg rounded-3xl p-8 text-center transform hover:scale-105 transition duration-300">
+                    <div class="w-20 h-20 bg-gradient-to-br from-red-500 to-pink-500 rounded-3xl flex items-center justify-center mx-auto mb-6">
+                        <i class="fas fa-utensils text-white text-3xl"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold text-gray-900 mb-4">For Food Lovers</h3>
+                    <p class="text-gray-600 mb-6">Order from thousands of restaurants and enjoy doorstep delivery</p>
+                    <a href="{{ url_for('auth.register') }}?role=customer" class="bg-red-500 text-white px-8 py-3 rounded-2xl font-semibold hover:bg-red-600 transition duration-300 block">
+                        Order Food
+                    </a>
+                </div>
+                
+                <!-- Restaurant Owner -->
+                <div class="bg-white bg-opacity-90 backdrop-blur-lg rounded-3xl p-8 text-center transform hover:scale-105 transition duration-300">
+                    <div class="w-20 h-20 bg-gradient-to-br from-blue-500 to-purple-500 rounded-3xl flex items-center justify-center mx-auto mb-6">
+                        <i class="fas fa-store text-white text-3xl"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold text-gray-900 mb-4">For Restaurant Owners</h3>
+                    <p class="text-gray-600 mb-6">List your restaurant and reach thousands of hungry customers</p>
+                    <a href="{{ url_for('auth.register') }}?role=restaurant_owner" class="bg-blue-500 text-white px-8 py-3 rounded-2xl font-semibold hover:bg-blue-600 transition duration-300 block">
+                        List Restaurant
+                    </a>
+                </div>
+                
+                <!-- Delivery Partner -->
+                <div class="bg-white bg-opacity-90 backdrop-blur-lg rounded-3xl p-8 text-center transform hover:scale-105 transition duration-300">
+                    <div class="w-20 h-20 bg-gradient-to-br from-green-500 to-teal-500 rounded-3xl flex items-center justify-center mx-auto mb-6">
+                        <i class="fas fa-motorcycle text-white text-3xl"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold text-gray-900 mb-4">For Delivery Partners</h3>
+                    <p class="text-gray-600 mb-6">Earn money by delivering food with flexible working hours</p>
+                    <a href="{{ url_for('auth.register') }}?role=delivery_person" class="bg-green-500 text-white px-8 py-3 rounded-2xl font-semibold hover:bg-green-600 transition duration-300 block">
+                        Start Earning
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                <div class="space-y-4">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-10 h-10 bg-gradient-to-br from-red-500 via-orange-500 to-pink-500 rounded-xl flex items-center justify-center">
+                            <i class="fas fa-utensils text-white"></i>
+                        </div>
+                        <h3 class="text-2xl font-bold">FoodieHub</h3>
+                    </div>
+                    <p class="text-gray-300 leading-relaxed">Your premium food delivery service, bringing gourmet experiences to your doorstep.</p>
+                </div>
+                <div>
+                    <h4 class="text-lg font-bold mb-6 text-white">Quick Links</h4>
+                    <ul class="space-y-3">
+                        <li><a href="{{ url_for('public.index') }}" class="text-gray-300 hover:text-white transition duration-200">Home</a></li>
+                        <li><a href="{{ url_for('public.restaurants') }}" class="text-gray-300 hover:text-white transition duration-200">Restaurants</a></li>
+                        <li><a href="{{ url_for('public.about') }}" class="text-gray-300 hover:text-white transition duration-200">About Us</a></li>
+                        <li><a href="{{ url_for('public.contact') }}" class="text-gray-300 hover:text-white transition duration-200">Contact</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="text-lg font-bold mb-6 text-white">Support</h4>
+                    <ul class="space-y-3">
+                        <li><a href="#" class="text-gray-300 hover:text-white transition duration-200">Help Center</a></li>
+                        <li><a href="{{ url_for('public.privacy') }}" class="text-gray-300 hover:text-white transition duration-200">Privacy Policy</a></li>
+                        <li><a href="{{ url_for('public.terms') }}" class="text-gray-300 hover:text-white transition duration-200">Terms of Service</a></li>
+                        <li><a href="#" class="text-gray-300 hover:text-white transition duration-200">24/7 Support</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="text-lg font-bold mb-6 text-white">Connect</h4>
+                    <div class="flex space-x-4 mb-6">
+                        <a href="#" class="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center hover:bg-blue-700 transition duration-300">
+                            <i class="fab fa-facebook-f"></i>
+                        </a>
+                        <a href="#" class="w-10 h-10 bg-blue-400 rounded-full flex items-center justify-center hover:bg-blue-500 transition duration-300">
+                            <i class="fab fa-twitter"></i>
+                        </a>
+                        <a href="#" class="w-10 h-10 bg-pink-600 rounded-full flex items-center justify-center hover:bg-pink-700 transition duration-300">
+                            <i class="fab fa-instagram"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="border-t border-gray-700 mt-12 pt-8 text-center">
+                <p class="text-gray-400">&copy; 2024 FoodieHub. All rights reserved. Made with ❤️ for food lovers.</p>
+            </div>
+        </div>
+    </footer>
+
+    <style>
+    @keyframes fade-in {
+        from { opacity: 0; transform: translateY(50px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .animate-fade-in {
+        animation: fade-in 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    </style>
+</body>
+</html>

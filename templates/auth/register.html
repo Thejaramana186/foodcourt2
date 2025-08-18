@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Join FoodieHub - Premium Food Delivery</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+    /* Ensure the page can scroll */
+    html, body { height: 100%; }
+    body {
+      overflow-y: auto !important;   /* override any overflow-hidden */
+      overflow-x: hidden;
+      -webkit-overflow-scrolling: touch;
+      font-family: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+    }
+
+    /* Nice thin scrollbar (WebKit) */
+    ::-webkit-scrollbar { width: 10px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(0,0,0,0.35);
+      border-radius: 8px;
+    }
+    ::-webkit-scrollbar-thumb:hover { background: rgba(0,0,0,0.50); }
+
+    /* Firefox thin scrollbar */
+    html { scrollbar-width: thin; scrollbar-color: rgba(0,0,0,0.35) transparent; }
+
+    /* Smooth scrolling for anchor jumps */
+    * { scroll-behavior: smooth; }
+  </style>
+</head>
+<body class="bg-gradient-to-br from-red-500 via-orange-500 to-pink-600 min-h-screen py-12 relative overflow-hidden">
+    <div class="absolute inset-0 bg-black opacity-20"></div>
+    
+    <!-- Animated background elements -->
+    <div class="absolute inset-0 overflow-hidden">
+        <div class="absolute top-10 right-10 w-64 h-64 bg-white opacity-10 rounded-full animate-pulse"></div>
+        <div class="absolute bottom-10 left-10 w-80 h-80 bg-yellow-300 opacity-15 rounded-full animate-bounce" style="animation-duration: 5s;"></div>
+        <div class="absolute top-1/2 right-1/3 w-48 h-48 bg-blue-400 opacity-20 rounded-full animate-pulse" style="animation-delay: 2s;"></div>
+    </div>
+    
+    <div class="relative w-full max-w-4xl mx-auto px-4 z-10">
+        <!-- Flash Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="mb-6 space-y-3">
+                    {% for category, message in messages %}
+                        <div class="px-6 py-4 rounded-2xl shadow-xl {% if category == 'success' %}bg-green-500{% elif category == 'error' %}bg-red-500{% else %}bg-blue-500{% endif %} text-white">
+                            <div class="flex items-center space-x-3">
+                                <i class="fas fa-{% if category == 'success' %}check-circle{% elif category == 'error' %}exclamation-circle{% else %}info-circle{% endif %} text-xl"></i>
+                                <span class="font-semibold">{{ message }}</span>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+        
+        <div class="bg-white rounded-3xl shadow-2xl overflow-hidden backdrop-blur-lg border border-gray-200">
+            <!-- Header -->
+            <div class="bg-gradient-to-br from-red-500 via-orange-500 to-pink-600 p-10 text-center relative">
+                <div class="absolute inset-0 bg-black opacity-10"></div>
+                <div class="relative z-10">
+                    <div class="w-24 h-24 bg-white rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-xl">
+                        <i class="fas fa-user-plus text-red-500 text-3xl"></i>
+                    </div>
+                    <h1 class="text-4xl font-black text-white mb-3">Join FoodieHub!</h1>
+                    <p class="text-white opacity-90 text-lg">Create your account and unlock a world of flavors</p>
+                </div>
+            </div>
+            
+            <!-- Form -->
+            <div class="p-10">
+                <form method="POST" class="space-y-8">
+                    <!-- Role Selection -->
+                    <div class="space-y-4">
+                        <label class="block text-sm font-bold text-gray-700 mb-4 flex items-center">
+                            <i class="fas fa-users mr-3 text-red-500 text-lg"></i>I want to join as:
+                        </label>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <label class="flex items-center p-4 border-2 border-gray-200 rounded-2xl cursor-pointer hover:border-red-300 transition duration-300 group">
+                                <input type="radio" name="role" value="customer" checked class="text-red-500 focus:ring-red-500">
+                                <div class="ml-4 text-center flex-1">
+                                    <div class="w-12 h-12 bg-red-100 rounded-2xl flex items-center justify-center mx-auto mb-2 group-hover:bg-red-200 transition duration-300">
+                                        <i class="fas fa-utensils text-red-500"></i>
+                                    </div>
+                                    <p class="font-semibold text-gray-900">Customer</p>
+                                    <p class="text-sm text-gray-600">Order delicious food</p>
+                                </div>
+                            </label>
+                            
+                            <label class="flex items-center p-4 border-2 border-gray-200 rounded-2xl cursor-pointer hover:border-blue-300 transition duration-300 group">
+                                <input type="radio" name="role" value="restaurant_owner" class="text-blue-500 focus:ring-blue-500">
+                                <div class="ml-4 text-center flex-1">
+                                    <div class="w-12 h-12 bg-blue-100 rounded-2xl flex items-center justify-center mx-auto mb-2 group-hover:bg-blue-200 transition duration-300">
+                                        <i class="fas fa-store text-blue-500"></i>
+                                    </div>
+                                    <p class="font-semibold text-gray-900">Restaurant Owner</p>
+                                    <p class="text-sm text-gray-600">Manage your restaurant</p>
+                                </div>
+                            </label>
+                            
+                            <label class="flex items-center p-4 border-2 border-gray-200 rounded-2xl cursor-pointer hover:border-green-300 transition duration-300 group">
+                                <input type="radio" name="role" value="delivery_person" class="text-green-500 focus:ring-green-500">
+                                <div class="ml-4 text-center flex-1">
+                                    <div class="w-12 h-12 bg-green-100 rounded-2xl flex items-center justify-center mx-auto mb-2 group-hover:bg-green-200 transition duration-300">
+                                        <i class="fas fa-motorcycle text-green-500"></i>
+                                    </div>
+                                    <p class="font-semibold text-gray-900">Delivery Partner</p>
+                                    <p class="text-sm text-gray-600">Deliver food & earn</p>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <!-- Username -->
+                        <div class="space-y-2">
+                            <label for="username" class="block text-sm font-bold text-gray-700 mb-3 flex items-center">
+                                <i class="fas fa-user mr-3 text-red-500 text-lg"></i>Username *
+                            </label>
+                            <input type="text" id="username" name="username" required
+                                   class="w-full px-6 py-4 border-2 border-gray-200 rounded-2xl focus:ring-4 focus:ring-red-500 focus:ring-opacity-20 focus:border-red-500 transition duration-300 text-lg"
+                                   placeholder="Choose a unique username">
+                        </div>
+                        
+                        <!-- Email -->
+                        <div class="space-y-2">
+                            <label for="email" class="block text-sm font-bold text-gray-700 mb-3 flex items-center">
+                                <i class="fas fa-envelope mr-3 text-red-500 text-lg"></i>Email Address *
+                            </label>
+                            <input type="email" id="email" name="email" required
+                                   class="w-full px-6 py-4 border-2 border-gray-200 rounded-2xl focus:ring-4 focus:ring-red-500 focus:ring-opacity-20 focus:border-red-500 transition duration-300 text-lg"
+                                   placeholder="your@email.com">
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <!-- First Name -->
+                        <div class="space-y-2">
+                            <label for="first_name" class="block text-sm font-bold text-gray-700 mb-3 flex items-center">
+                                <i class="fas fa-id-card mr-3 text-red-500 text-lg"></i>First Name *
+                            </label>
+                            <input type="text" id="first_name" name="first_name" required
+                                   class="w-full px-6 py-4 border-2 border-gray-200 rounded-2xl focus:ring-4 focus:ring-red-500 focus:ring-opacity-20 focus:border-red-500 transition duration-300 text-lg"
+                                   placeholder="Your first name">
+                        </div>
+                        
+                        <!-- Last Name -->
+                        <div class="space-y-2">
+                            <label for="last_name" class="block text-sm font-bold text-gray-700 mb-3 flex items-center">
+                                <i class="fas fa-id-card mr-3 text-red-500 text-lg"></i>Last Name *
+                            </label>
+                            <input type="text" id="last_name" name="last_name" required
+                                   class="w-full px-6 py-4 border-2 border-gray-200 rounded-2xl focus:ring-4 focus:ring-red-500 focus:ring-opacity-20 focus:border-red-500 transition duration-300 text-lg"
+                                   placeholder="Your last name">
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <!-- Password -->
+                        <div class="space-y-2">
+                            <label for="password" class="block text-sm font-bold text-gray-700 mb-3 flex items-center">
+                                <i class="fas fa-lock mr-3 text-red-500 text-lg"></i>Password *
+                            </label>
+                            <div class="relative">
+                                <input type="password" id="password" name="password" required
+                                       class="w-full px-6 py-4 border-2 border-gray-200 rounded-2xl focus:ring-4 focus:ring-red-500 focus:ring-opacity-20 focus:border-red-500 transition duration-300 text-lg"
+                                       placeholder="Create a strong password">
+                                <button type="button" onclick="togglePassword('password')" class="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition duration-200">
+                                    <i id="password-icon" class="fas fa-eye text-xl"></i>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- Confirm Password -->
+                        <div class="space-y-2">
+                            <label for="confirm_password" class="block text-sm font-bold text-gray-700 mb-3 flex items-center">
+                                <i class="fas fa-lock mr-3 text-red-500 text-lg"></i>Confirm Password *
+                            </label>
+                            <div class="relative">
+                                <input type="password" id="confirm_password" name="confirm_password" required
+                                       class="w-full px-6 py-4 border-2 border-gray-200 rounded-2xl focus:ring-4 focus:ring-red-500 focus:ring-opacity-20 focus:border-red-500 transition duration-300 text-lg"
+                                       placeholder="Confirm your password">
+                                <button type="button" onclick="togglePassword('confirm_password')" class="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition duration-200">
+                                    <i id="confirm-password-icon" class="fas fa-eye text-xl"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <!-- Phone -->
+                        <div class="space-y-2">
+                            <label for="phone" class="block text-sm font-bold text-gray-700 mb-3 flex items-center">
+                                <i class="fas fa-phone mr-3 text-red-500 text-lg"></i>Phone Number *
+                            </label>
+                            <input type="tel" id="phone" name="phone" pattern="[0-9]{10}" maxlength="10" required
+                                   class="w-full px-6 py-4 border-2 border-gray-200 rounded-2xl focus:ring-4 focus:ring-red-500 focus:ring-opacity-20 focus:border-red-500 transition duration-300 text-lg"
+                                   placeholder="10-digit phone number">
+                        </div>
+                        
+                        <!-- City -->
+                        <div class="space-y-2">
+                            <label for="city" class="block text-sm font-bold text-gray-700 mb-3 flex items-center">
+                                <i class="fas fa-map-marker-alt mr-3 text-red-500 text-lg"></i>City
+                            </label>
+                            <select id="city" name="city" class="w-full px-6 py-4 border-2 border-gray-200 rounded-2xl focus:ring-4 focus:ring-red-500 focus:ring-opacity-20 focus:border-red-500 transition duration-300 text-lg">
+                                <option value="">Select your city</option>
+                                <option value="mumbai">Mumbai</option>
+                                <option value="delhi">Delhi</option>
+                                <option value="bangalore">Bangalore</option>
+                                <option value="hyderabad">Hyderabad</option>
+                                <option value="pune">Pune</option>
+                                <option value="kolkata">Kolkata</option>
+                                <option value="chennai">Chennai</option>
+                                <option value="ahmedabad">Ahmedabad</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <!-- Address -->
+                    <div class="space-y-2">
+                        <label for="address" class="block text-sm font-bold text-gray-700 mb-3 flex items-center">
+                            <i class="fas fa-home mr-3 text-red-500 text-lg"></i>Address
+                        </label>
+                        <textarea id="address" name="address" rows="3"
+                                  class="w-full px-6 py-4 border-2 border-gray-200 rounded-2xl focus:ring-4 focus:ring-red-500 focus:ring-opacity-20 focus:border-red-500 transition duration-300 text-lg resize-none"
+                                  placeholder="Enter your complete address..."></textarea>
+                    </div>
+                    
+                    <!-- Terms -->
+                    <div class="space-y-6">
+                        <label class="flex items-start group cursor-pointer p-4 rounded-2xl border-2 border-gray-200 hover:border-red-300 transition duration-300">
+                            <input type="checkbox" id="terms" required class="mt-1 rounded-lg text-red-500 focus:ring-red-500 focus:ring-opacity-50 w-5 h-5">
+                            <span class="ml-4 text-gray-600 group-hover:text-gray-800 transition duration-200">
+                                I agree to the <a href="{{ url_for('public.terms') }}" class="text-red-600 hover:text-red-700 font-semibold">Terms of Service</a> 
+                                and <a href="{{ url_for('public.privacy') }}" class="text-red-600 hover:text-red-700 font-semibold">Privacy Policy</a>
+                            </span>
+                        </label>
+                    </div>
+                    
+                    <button type="submit" 
+                            class="w-full bg-gradient-to-r from-red-500 via-orange-500 to-pink-600 text-white py-6 rounded-2xl font-black text-2xl hover:shadow-xl transform hover:scale-105 transition duration-300 relative overflow-hidden group">
+                        <span class="relative z-10 flex items-center justify-center space-x-4">
+                            <i class="fas fa-rocket text-2xl group-hover:rotate-12 transition duration-300"></i>
+                            <span>Join FoodieHub</span>
+                            <i class="fas fa-arrow-right text-2xl group-hover:translate-x-2 transition duration-300"></i>
+                        </span>
+                        <div class="absolute inset-0 bg-gradient-to-r from-pink-600 to-red-600 opacity-0 group-hover:opacity-100 transition duration-300"></div>
+                    </button>
+                </form>
+                
+                <!-- Login Link -->
+                <div class="mt-10 text-center">
+                    <p class="text-gray-600 text-lg">
+                        Already have an account? 
+                        <a href="{{ url_for('auth.login') }}" class="text-red-600 hover:text-red-700 font-bold transition duration-200 ml-1">Sign In</a>
+                    </p>
+                </div>
+                
+                <!-- Back to Home -->
+                <div class="mt-6 text-center">
+                    <a href="{{ url_for('public.index') }}" class="text-gray-500 hover:text-gray-700 transition duration-200">
+                        <i class="fas fa-arrow-left mr-2"></i>Back to Home
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    function togglePassword(inputId) {
+        const passwordInput = document.getElementById(inputId);
+        const iconId = inputId === 'password' ? 'password-icon' : 'confirm-password-icon';
+        const passwordIcon = document.getElementById(iconId);
+        
+        if (passwordInput.type === 'password') {
+            passwordInput.type = 'text';
+            passwordIcon.classList.remove('fa-eye');
+            passwordIcon.classList.add('fa-eye-slash');
+        } else {
+            passwordInput.type = 'password';
+            passwordIcon.classList.remove('fa-eye-slash');
+            passwordIcon.classList.add('fa-eye');
+        }
+    }
+
+    // Phone number validation
+    document.getElementById('phone').addEventListener('input', function(e) {
+        let value = e.target.value.replace(/\D/g, '');
+        if (value.length > 10) {
+            value = value.substring(0, 10);
+        }
+        e.target.value = value;
+    });
+    </script>
+</body>
+</html>

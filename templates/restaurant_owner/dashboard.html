@@ -1,0 +1,187 @@
+{% extends "restaurant_owner/base.html" %}
+
+{% block title %}Dashboard - Restaurant Owner{% endblock %}
+{% block page_title %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="row">
+    <!-- Statistics Cards -->
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-left-primary shadow h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                            Total Restaurants</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{ stats.total_restaurants }}</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-store fa-2x text-gray-300"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-left-success shadow h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                            Total Orders</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{ stats.total_orders }}</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-shopping-cart fa-2x text-gray-300"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-left-info shadow h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                            Total Revenue</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">${{ "%.2f"|format(stats.total_revenue) }}</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-dollar-sign fa-2x text-gray-300"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-left-warning shadow h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                            Pending Orders</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{ stats.pending_orders }}</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-clock fa-2x text-gray-300"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Recent Orders -->
+    <div class="col-lg-8 mb-4">
+        <div class="card shadow">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">Recent Orders</h6>
+            </div>
+            <div class="card-body">
+                {% if recent_orders %}
+                    <div class="table-responsive">
+                        <table class="table table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>Order ID</th>
+                                    <th>Customer</th>
+                                    <th>Restaurant</th>
+                                    <th>Total</th>
+                                    <th>Status</th>
+                                    <th>Date</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for order in recent_orders %}
+                                <tr>
+                                    <td>#{{ order.id }}</td>
+                                    <td>{{ order.customer.name if order.customer else 'N/A' }}</td>
+                                    <td>{{ order.restaurant.name if order.restaurant else 'N/A' }}</td>
+                                    <td>${{ "%.2f"|format(order.total_amount) }}</td>
+                                    <td>
+                                        <span class="badge bg-{{ 'success' if order.status == 'completed' else 'warning' if order.status == 'pending' else 'info' }}">
+                                            {{ order.status.title() }}
+                                        </span>
+                                    </td>
+                                    <td>{{ order.created_at.strftime('%Y-%m-%d %H:%M') if order.created_at else 'N/A' }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <p class="text-muted">No recent orders found.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="col-lg-4 mb-4">
+        <div class="card shadow">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">Quick Actions</h6>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-2">
+                    <a href="{{ url_for('restaurant_owner.add_restaurant') }}" class="btn btn-primary">
+                        <i class="fas fa-plus me-2"></i>Add New Restaurant
+                    </a>
+                    <a href="{{ url_for('restaurant_owner.restaurants') }}" class="btn btn-outline-primary">
+                        <i class="fas fa-store me-2"></i>Manage Restaurants
+                    </a>
+                    <a href="{{ url_for('restaurant_owner.orders') }}" class="btn btn-outline-success">
+                        <i class="fas fa-shopping-cart me-2"></i>View All Orders
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- My Restaurants -->
+{% if restaurants %}
+<div class="row">
+    <div class="col-12">
+        <div class="card shadow">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">My Restaurants</h6>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    {% for restaurant in restaurants[:6] %}
+                    <div class="col-md-4 mb-3">
+                        <div class="card">
+                            <img src="{{ restaurant.image or 'https://images.pexels.com/photos/1640777/pexels-photo-1640777.jpeg?auto=compress&cs=tinysrgb&w=400' }}" 
+                                 class="card-img-top" alt="{{ restaurant.name }}" style="height: 200px; object-fit: cover;">
+                            <div class="card-body">
+                                <h5 class="card-title">{{ restaurant.name }}</h5>
+                                <p class="card-text">{{ restaurant.cuisine }}</p>
+                                <p class="card-text"><small class="text-muted">{{ restaurant.city }}</small></p>
+                                <div class="btn-group w-100" role="group">
+                                    <a href="{{ url_for('restaurant_owner.edit_restaurant', restaurant_id=restaurant.id) }}" 
+                                       class="btn btn-sm btn-outline-primary">Edit</a>
+                                    <a href="{{ url_for('restaurant_owner.menu_management', restaurant_id=restaurant.id) }}" 
+                                       class="btn btn-sm btn-outline-success">Menu</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% if restaurants|length > 6 %}
+                <div class="text-center mt-3">
+                    <a href="{{ url_for('restaurant_owner.restaurants') }}" class="btn btn-primary">View All Restaurants</a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,121 @@
+{% extends "restaurant_owner/base.html" %}
+
+{% block title %}My Restaurants - Restaurant Owner{% endblock %}
+{% block page_title %}My Restaurants{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>My Restaurants</h2>
+    <a href="{{ url_for('restaurant_owner.add_restaurant') }}" class="btn btn-primary">
+        <i class="fas fa-plus me-2"></i>Add New Restaurant
+    </a>
+</div>
+
+{% if restaurants %}
+    {% if restaurants.items %}
+        <div class="row">
+            {% for restaurant in restaurants.items %}
+            <div class="col-md-6 col-lg-4 mb-4">
+                <div class="card h-100 shadow-sm">
+                    <img src="{{ restaurant.image or 'https://images.pexels.com/photos/1640777/pexels-photo-1640777.jpeg?auto=compress&cs=tinysrgb&w=400' }}" 
+                         class="card-img-top" alt="{{ restaurant.name }}" style="height: 200px; object-fit: cover;">
+                    <div class="card-body d-flex flex-column">
+                        <h5 class="card-title">{{ restaurant.name }}</h5>
+                        <p class="card-text">{{ restaurant.description[:100] }}{% if restaurant.description|length > 100 %}...{% endif %}</p>
+                        <div class="mb-2">
+                            <small class="text-muted">
+                                <i class="fas fa-utensils me-1"></i>{{ restaurant.cuisine }}
+                            </small>
+                        </div>
+                        <div class="mb-2">
+                            <small class="text-muted">
+                                <i class="fas fa-map-marker-alt me-1"></i>{{ restaurant.address }}, {{ restaurant.city }}
+                            </small>
+                        </div>
+                        <div class="mb-2">
+                            <small class="text-muted">
+                                <i class="fas fa-phone me-1"></i>{{ restaurant.phone }}
+                            </small>
+                        </div>
+                        {% if restaurant.opening_time and restaurant.closing_time %}
+                        <div class="mb-3">
+                            <small class="text-muted">
+                                <i class="fas fa-clock me-1"></i>{{ restaurant.opening_time }} - {{ restaurant.closing_time }}
+                            </small>
+                        </div>
+                        {% endif %}
+                        <div class="mt-auto">
+                            <div class="btn-group w-100" role="group">
+                                <a href="{{ url_for('restaurant_owner.edit_restaurant', restaurant_id=restaurant.id) }}" 
+                                   class="btn btn-outline-primary btn-sm">
+                                    <i class="fas fa-edit me-1"></i>Edit
+                                </a>
+                                <a href="{{ url_for('restaurant_owner.menu_management', restaurant_id=restaurant.id) }}" 
+                                   class="btn btn-outline-success btn-sm">
+                                    <i class="fas fa-list me-1"></i>Menu
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- Pagination -->
+        {% if restaurants.pages > 1 %}
+        <nav aria-label="Restaurant pagination">
+            <ul class="pagination justify-content-center">
+                {% if restaurants.has_prev %}
+                    <li class="page-item">
+                        <a class="page-link" href="{{ url_for('restaurant_owner.restaurants', page=restaurants.prev_num) }}">Previous</a>
+                    </li>
+                {% endif %}
+                
+                {% for page_num in restaurants.iter_pages() %}
+                    {% if page_num %}
+                        {% if page_num != restaurants.page %}
+                            <li class="page-item">
+                                <a class="page-link" href="{{ url_for('restaurant_owner.restaurants', page=page_num) }}">{{ page_num }}</a>
+                            </li>
+                        {% else %}
+                            <li class="page-item active">
+                                <span class="page-link">{{ page_num }}</span>
+                            </li>
+                        {% endif %}
+                    {% else %}
+                        <li class="page-item disabled">
+                            <span class="page-link">...</span>
+                        </li>
+                    {% endif %}
+                {% endfor %}
+                
+                {% if restaurants.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="{{ url_for('restaurant_owner.restaurants', page=restaurants.next_num) }}">Next</a>
+                    </li>
+                {% endif %}
+            </ul>
+        </nav>
+        {% endif %}
+    {% else %}
+        <div class="text-center py-5">
+            <i class="fas fa-store fa-3x text-muted mb-3"></i>
+            <h4>No Restaurants Found</h4>
+            <p class="text-muted">You haven't added any restaurants yet.</p>
+            <a href="{{ url_for('restaurant_owner.add_restaurant') }}" class="btn btn-primary">
+                <i class="fas fa-plus me-2"></i>Add Your First Restaurant
+            </a>
+        </div>
+    {% endif %}
+{% else %}
+    <div class="text-center py-5">
+        <i class="fas fa-store fa-3x text-muted mb-3"></i>
+        <h4>No Restaurants Found</h4>
+        <p class="text-muted">You haven't added any restaurants yet.</p>
+        <a href="{{ url_for('restaurant_owner.add_restaurant') }}" class="btn btn-primary">
+            <i class="fas fa-plus me-2"></i>Add Your First Restaurant
+        </a>
+    </div>
+{% endif %}
+{% endblock %}
