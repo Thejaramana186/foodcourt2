@@ -29,7 +29,8 @@ class Restaurant(db.Model):
     
     # Relationships
     menus = db.relationship('Menu', backref='restaurant', lazy=True, cascade='all, delete-orphan')
-    orders = db.relationship('Order', backref='restaurant', lazy=True)
+    orders = db.relationship("Order", back_populates="restaurant", lazy=True)
+
     
     def get_average_rating(self):
         """Calculate average rating from orders"""

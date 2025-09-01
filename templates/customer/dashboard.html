@@ -23,7 +23,7 @@
                     <div class="hidden md:flex items-center space-x-6">
                         <a href="{{ url_for('customer.dashboard') }}" class="text-red-600 font-semibold border-b-2 border-red-500 pb-1">Dashboard</a>
                         <a href="{{ url_for('customer.restaurants') }}" class="text-gray-700 hover:text-red-600 font-medium transition duration-300">Restaurants</a>
-                        <a href="{{ url_for('customer.orders') }}" class="text-gray-700 hover:text-red-600 font-medium transition duration-300">My Orders</a>
+                        <a href="{{ url_for('customer.orders') }}" class="text-gray-700 hover:text-red-600 font-medium transition duration-300">Orders</a>
                         <a href="{{ url_for('customer.favorites') }}" class="text-gray-700 hover:text-red-600 font-medium transition duration-300">Favorites</a>
                     </div>
                 </div>
@@ -31,7 +31,7 @@
                 <div class="flex items-center space-x-4">
                     <a href="{{ url_for('customer.cart') }}" class="relative text-gray-700 hover:text-red-600 transition duration-300">
                         <i class="fas fa-shopping-cart text-xl"></i>
-                        <span id="cart-count" class="absolute -top-2 -right-2 w-5 h-5 bg-gradient-to-r from-red-500 to-pink-500 text-white text-xs rounded-full flex items-center justify-center font-bold">{{ cart_count }}</span>
+                        <span id="cart-count" class="absolute -top-2 -right-2 w-5 h-5 bg-gradient-to-r from-red-500 to-pink-500 text-white text-xs rounded-full flex items-center justify-center font-bold">{{ cart_count or 0 }}</span>
                     </a>
                     
                     <div class="flex items-center space-x-3">
@@ -39,7 +39,7 @@
                             <i class="fas fa-user text-white"></i>
                         </div>
                         <div>
-                            <p class="font-semibold text-gray-900">{{ user.get_full_name() }}</p>
+                            <p class="font-semibold text-gray-900">{{ current_user.first_name }} {{ current_user.last_name }}</p>
                             <p class="text-xs text-gray-500">Customer</p>
                         </div>
                     </div>
@@ -74,11 +74,10 @@
         <div class="bg-gradient-to-r from-red-500 via-orange-500 to-pink-600 rounded-3xl p-8 text-white mb-8 relative overflow-hidden">
             <div class="absolute inset-0 bg-black opacity-10"></div>
             <div class="relative z-10">
-                <h1 class="text-4xl font-black mb-2">Welcome back, {{ user.first_name }}! 👋</h1>
+                <h1 class="text-4xl font-black mb-2">Welcome back, {{ current_user.first_name }}! 👋</h1>
                 <p class="text-xl opacity-90">Ready to discover your next favorite meal?</p>
             </div>
         </div>
-
 
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <!-- Recent Orders -->
@@ -89,9 +88,9 @@
                         <a href="{{ url_for('customer.orders') }}" class="text-red-600 hover:text-red-700 font-medium">View All</a>
                     </div>
                     
-                    {% if recent_orders.items %}
+                    {% if recent_orders %}
                         <div class="space-y-4">
-                            {% for order in recent_orders.items %}
+                            {% for order in recent_orders %}
                             <div class="border border-gray-200 rounded-xl p-4 hover:shadow-md transition duration-300">
                                 <div class="flex items-center justify-between">
                                     <div class="flex items-center space-x-4">
@@ -100,7 +99,7 @@
                                         </div>
                                         <div>
                                             <h3 class="font-semibold text-gray-900">{{ order.restaurant.name }}</h3>
-                                            <p class="text-sm text-gray-600">Order #{{ order.order_number }}</p>
+                                            <p class="text-sm text-gray-600">Order #{{ order.id }}</p>
                                             <p class="text-xs text-gray-500">{{ order.created_at.strftime('%B %d, %Y') }}</p>
                                         </div>
                                     </div>
@@ -111,7 +110,7 @@
                                             {% elif order.status == 'cancelled' %}bg-red-100 text-red-800
                                             {% elif order.status in ['out_for_delivery', 'preparing'] %}bg-orange-100 text-orange-800
                                             {% else %}bg-blue-100 text-blue-800{% endif %}">
-                                            {{ order.get_status_display() }}
+                                            {{ order.status.replace('_', ' ').title() }}
                                         </span>
                                     </div>
                                 </div>
@@ -149,11 +148,11 @@
                     <div class="flex items-center justify-between mb-4">
                         <h3 class="text-xl font-bold text-gray-900">Your Cart</h3>
                         <div class="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center">
-                            <span class="text-red-600 font-bold text-sm">{{ cart_count }}</span>
+                            <span class="text-red-600 font-bold text-sm">{{ cart_count or 0 }}</span>
                         </div>
                     </div>
                     
-                    {% if cart_count > 0 %}
+                    {% if cart_count and cart_count > 0 %}
                         <p class="text-gray-600 mb-4">You have {{ cart_count }} item(s) in your cart</p>
                         <a href="{{ url_for('customer.cart') }}" class="w-full bg-orange-500 text-white py-3 rounded-xl font-semibold hover:bg-orange-600 transition duration-300 text-center block">
                             <i class="fas fa-shopping-cart mr-2"></i>View Cart
@@ -180,7 +179,7 @@
                 {% for restaurant in favorite_restaurants %}
                 <div class="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transform hover:scale-105 transition duration-300">
                     <div class="relative">
-                        <img src="{{ restaurant.image }}" alt="{{ restaurant.name }}" class="w-full h-48 object-cover">
+                        <img src="{{ restaurant.image or 'https://images.pexels.com/photos/1640777/pexels-photo-1640777.jpeg?auto=compress&cs=tinysrgb&w=400' }}" alt="{{ restaurant.name }}" class="w-full h-48 object-cover">
                         <div class="absolute top-4 left-4 bg-white px-3 py-1 rounded-full text-sm font-semibold shadow-lg">
                             <i class="fas fa-star text-yellow-400 mr-1"></i>{{ restaurant.rating }}
                         </div>
@@ -202,6 +201,10 @@
             </div>
         </div>
         {% endif %}
+
+        
+
+             
     </main>
 
     <script>
@@ -214,6 +217,25 @@
             setTimeout(() => alert.remove(), 300);
         });
     }, 5000);
+
+    // Update cart count dynamically
+    function updateCartCount() {
+        fetch('/customer/cart/count')
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    document.getElementById('cart-count').textContent = data.count;
+                }
+            })
+            .catch(error => {
+                console.error('Error updating cart count:', error);
+            });
+    }
+
+    // Refresh cart count on page load
+    document.addEventListener('DOMContentLoaded', function() {
+        updateCartCount();
+    });
     </script>
 </body>
 </html>

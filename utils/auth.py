@@ -1,73 +1,110 @@
+from flask import session, g, redirect, url_for, flash
+from flask_login import login_user as flask_login_user, logout_user as flask_logout_user, current_user
 from functools import wraps
-from flask import session, redirect, url_for, flash, request, jsonify
 from models.user import User
 
+def get_current_user():
+    """Get current user from session"""
+    user_id = session.get('user_id')
+    if user_id:
+        return User.query.get(user_id)
+    return None
+
+def login_user_session(user):
+    """Login user in both custom session and Flask-Login"""
+    session['user_id'] = user.id
+    session['user_role'] = user.role
+    flask_login_user(user)
+
+def logout_user_session():
+    """Logout user from both custom session and Flask-Login"""
+    session.pop('user_id', None)
+    session.pop('user_role', None)
+    flask_logout_user()
+
 def login_required(f):
-    """Decorator to require authentication"""
+    """Decorator to require user to be logged in"""
     @wraps(f)
     def decorated_function(*args, **kwargs):
-        if 'user_id' not in session:
-            if request.is_json:
-                return jsonify({'error': 'Authentication required'}), 401
+        if not g.current_user:
             flash('Please log in to access this page.', 'error')
-            return redirect(url_for('auth.login', next=request.url))
+            return redirect(url_for('auth.login'))
         return f(*args, **kwargs)
     return decorated_function
 
-def role_required(*roles):
-    """Decorator to require specific roles"""
-    def decorator(f):
-        @wraps(f)
-        def decorated_function(*args, **kwargs):
-            if 'user_id' not in session:
-                if request.is_json:
-                    return jsonify({'error': 'Authentication required'}), 401
-                flash('Please log in to access this page.', 'error')
-                return redirect(url_for('auth.login'))
-            
-            user = User.query.get(session['user_id'])
-            if not user or user.role not in roles:
-                if request.is_json:
-                    return jsonify({'error': 'Insufficient permissions'}), 403
-                flash('You do not have permission to access this page.', 'error')
-                return redirect(url_for('dashboard.index'))
-            
-            return f(*args, **kwargs)
-        return decorated_function
-    return decorator
-
-def admin_required(f):
-    """Decorator to require admin role"""
-    return role_required('admin')(f)
+def customer_required(f):
+    """Decorator to require customer role"""
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if not g.current_user:
+            flash('Please log in to access this page.', 'error')
+            return redirect(url_for('auth.login'))
+        if not g.current_user.is_customer():
+            flash('Access denied. Customer access required.', 'error')
+            return redirect(url_for('public.index'))
+        return f(*args, **kwargs)
+    return decorated_function
 
 def restaurant_owner_required(f):
     """Decorator to require restaurant owner role"""
-    return role_required('restaurant_owner')(f)
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if not g.current_user:
+            flash('Please log in to access this page.', 'error')
+            return redirect(url_for('auth.login'))
+        if not g.current_user.is_restaurant_owner():
+            flash('Access denied. Restaurant owner access required.', 'error')
+            return redirect(url_for('public.index'))
+        return f(*args, **kwargs)
+    return decorated_function
+
+def delivery_required(f):
+    """Decorator to require delivery person role"""
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if not g.current_user:
+            flash('Please log in to access this page.', 'error')
+            return redirect(url_for('auth.login'))
+        if not g.current_user.is_delivery_person():
+            flash('Access denied. Delivery person access required.', 'error')
+            return redirect(url_for('public.index'))
+        return f(*args, **kwargs)
+    return decorated_function
+
+def admin_required(f):
+    """Decorator to require admin role"""
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if not g.current_user:
+            flash('Please log in to access this page.', 'error')
+            return redirect(url_for('auth.login'))
+        if not g.current_user.is_admin():
+            flash('Access denied. Admin access required.', 'error')
+            return redirect(url_for('public.index'))
+        return f(*args, **kwargs)
+    return decorated_function
 
 def delivery_person_required(f):
-    """Decorator to require delivery person role"""
-    return role_required('delivery_person')(f)
+    """Decorator to require delivery person role (alias for delivery_required)"""
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if not g.current_user:
+            flash('Please log in to access this page.', 'error')
+            return redirect(url_for('auth.login'))
+        if not g.current_user.is_delivery_person():
+            flash('Access denied. Delivery person access required.', 'error')
+            return redirect(url_for('public.index'))
+        return f(*args, **kwargs)
+    return decorated_function
 
-def customer_required(f):
-    """Decorator to require customer role"""
-    return role_required('customer')(f)
-
-def get_current_user():
-    """Get the current logged-in user"""
-    if 'user_id' not in session:
-        return None
-    return User.query.get(session['user_id'])
-
-def is_authenticated():
-    """Check if user is authenticated"""
-    return 'user_id' in session
-
-def has_role(role):
-    """Check if current user has specific role"""
-    user = get_current_user()
-    return user and user.role == role
-
-def has_any_role(*roles):
-    """Check if current user has any of the specified roles"""
-    user = get_current_user()
-    return user and user.role in roles
+def require_role(role):
+    """Decorator to require specific role"""
+    def decorator(f):
+        @wraps(f)
+        def decorated_function(*args, **kwargs):
+            if not g.current_user or g.current_user.role != role:
+                flash('Access denied.', 'error')
+                return redirect(url_for('auth.login'))
+            return f(*args, **kwargs)
+        return decorated_function
+    return decorator

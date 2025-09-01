@@ -1,13 +1,18 @@
 from db import db
 from datetime import datetime
 
+
 class Order(db.Model):
     __tablename__ = 'orders'
     
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)  # Customer
+
+    # Foreign Keys
+    customer_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)  # Customer placing order
     restaurant_id = db.Column(db.Integer, db.ForeignKey('restaurants.id'), nullable=False)
-    delivery_person_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True)  # Delivery person
+    delivery_person_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True)  # Assigned delivery person
+
+    # Order details
     order_number = db.Column(db.String(20), unique=True, nullable=False)
     total_amount = db.Column(db.Float, nullable=False)
     delivery_fee = db.Column(db.Float, default=0.0)
@@ -55,6 +60,26 @@ class Order(db.Model):
         lazy=True,
         cascade='all, delete-orphan'
     )
+
+    # Link to User as customer
+    customer = db.relationship(
+        'User',
+        backref=db.backref('orders', overlaps="customer_orders"),
+        foreign_keys=[customer_id]
+    )
+    # Link to User as delivery person
+    delivery_person = db.relationship(
+        "User",
+        foreign_keys=[delivery_person_id],
+        back_populates="delivery_orders"
+    )
+
+
+
+    
+    # Link to Restaurant
+    restaurant = db.relationship("Restaurant", back_populates="orders", lazy=True)
+
     
     def __init__(self, **kwargs):
         super(Order, self).__init__(**kwargs)
@@ -98,7 +123,7 @@ class Order(db.Model):
         return {
             'id': self.id,
             'order_number': self.order_number,
-            'user_id': self.user_id,
+            'customer_id': self.customer_id,
             'restaurant_id': self.restaurant_id,
             'delivery_person_id': self.delivery_person_id,
             'total_amount': self.total_amount,
@@ -120,7 +145,7 @@ class Order(db.Model):
             'special_instructions': self.special_instructions,
             'rating': self.rating,
             'review': self.review,
-            'restaurant': self.restaurant.to_dict() if hasattr(self, 'restaurant') and self.restaurant else None,
+            'restaurant': self.restaurant.to_dict() if self.restaurant else None,
             'order_items': [item.to_dict() for item in self.order_items],
             'created_at': self.created_at.isoformat() if self.created_at else None,
             'estimated_delivery_time': self.estimated_delivery_time.isoformat() if self.estimated_delivery_time else None,
@@ -129,6 +154,7 @@ class Order(db.Model):
     
     def __repr__(self):
         return f'<Order {self.order_number}>'
+
 
 class OrderItem(db.Model):
     __tablename__ = 'order_items'

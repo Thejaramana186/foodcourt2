@@ -1,0 +1,57 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}{{ restaurant.name }} - Menu{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <!-- Restaurant Header -->
+    <div class="card restaurant-header mb-4">
+        <div class="card-body">
+            <h2>{{ restaurant.name }}</h2>
+            <p class="text-muted">{{ restaurant.description }}</p>
+            <p><i class="fas fa-map-marker-alt"></i> {{ restaurant.location }}</p>
+        </div>
+    </div>
+
+    <!-- Menu Items -->
+    <div class="row">
+        {% for item in menu_items %}
+        <div class="col-md-6 col-lg-4 mb-4">
+            <div class="card menu-item-card">
+                <img src="{{ item.image_url or 'https://images.pexels.com/photos/376464/pexels-photo-376464.jpeg?auto=compress&cs=tinysrgb&w=400' }}" 
+                     class="card-img-top menu-image" alt="{{ item.name }}">
+                <div class="card-body">
+                    <h5 class="card-title">{{ item.name }}</h5>
+                    <p class="card-text">{{ item.description }}</p>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span class="price">₹{{ "%.2f"|format(item.price) }}</span>
+                        {% if item.is_available %}
+                        <button class="btn btn-primary add-to-cart-btn" 
+                                data-menu-id="{{ item.id }}" 
+                                data-restaurant-id="{{ restaurant.id }}">
+                            <i class="fas fa-cart-plus"></i> Add to Cart
+                        </button>
+                        {% else %}
+                        <button class="btn btn-secondary" disabled>
+                            Not Available
+                        </button>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    {% if not menu_items %}
+    <div class="text-center mt-5">
+        <h4>No menu items available</h4>
+        <p class="text-muted">This restaurant hasn't added any menu items yet.</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/cart.js') }}"></script>
+{% endblock %}

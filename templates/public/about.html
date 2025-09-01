@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About Us - FoodieHub</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .hero-section {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 4rem 0;
+        }
+        .feature-box {
+            display: flex;
+            align-items: flex-start;
+        }
+        .feature-box i {
+            margin-right: 15px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
+        <div class="container">
+            <a class="navbar-brand text-primary fw-bold" href="{{ url_for('public.index') }}">
+                <i class="fas fa-utensils me-2"></i>FoodieHub
+            </a>
+            <div class="navbar-nav ms-auto">
+                <a class="nav-link" href="{{ url_for('public.index') }}">Back to Home</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero-section text-center">
+        <div class="container">
+            <h1 class="display-4 fw-bold mb-3">About FoodieHub</h1>
+            <p class="lead mb-0">Your trusted partner for delicious food delivery</p>
+        </div>
+    </section>
+
+    <!-- About Content -->
+    <section class="py-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8 mx-auto">
+                    <h2 class="mb-4">Our Story</h2>
+                    <p class="lead">FoodieHub was founded with a simple mission: to connect food lovers with their favorite restaurants and deliver happiness to their doorstep.</p>
+                    
+                    <p>We believe that great food brings people together, and everyone deserves access to delicious, fresh meals. Our platform makes it easy for customers to discover new restaurants, order their favorite dishes, and enjoy restaurant-quality food from the comfort of their homes.</p>
+                    
+                    <h3 class="mt-5 mb-4">What We Offer</h3>
+                    <div class="row g-4">
+                        <div class="col-md-6">
+                            <div class="feature-box">
+                                <i class="fas fa-utensils fa-2x text-primary"></i>
+                                <div>
+                                    <h5>Wide Restaurant Selection</h5>
+                                    <p>Choose from hundreds of restaurants offering various cuisines.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="feature-box">
+                                <i class="fas fa-shipping-fast fa-2x text-primary"></i>
+                                <div>
+                                    <h5>Fast Delivery</h5>
+                                    <p>Quick and reliable delivery to your location.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="feature-box">
+                                <i class="fas fa-star fa-2x text-primary"></i>
+                                <div>
+                                    <h5>Quality Assurance</h5>
+                                    <p>All partner restaurants are verified for quality and hygiene.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="feature-box">
+                                <i class="fas fa-mobile-alt fa-2x text-primary"></i>
+                                <div>
+                                    <h5>Easy Ordering</h5>
+                                    <p>Simple and intuitive ordering process.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div> <!-- row -->
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-white py-4">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6">
+                    <h5><i class="fas fa-utensils me-2"></i>FoodieHub</h5>
+                    <p class="mb-0">Delicious food delivered to your doorstep</p>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <p class="mb-0">&copy; {{ current_year }} FoodieHub. All rights reserved.</p>
+
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

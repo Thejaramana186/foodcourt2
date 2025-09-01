@@ -1,0 +1,42 @@
+{% extends "restaurant_owner/base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2 class="mb-4">Edit Menu Item</h2>
+
+    <div class="card shadow-sm p-4">
+        <form method="POST" action="{{ url_for('restaurant_owner.edit_menu_item', restaurant_id=restaurant.id, item_id=menu_item.id) }}">
+            
+            <!-- Item Name -->
+            <div class="mb-3">
+                <label for="name" class="form-label fw-bold">Item Name</label>
+                <input type="text" class="form-control" id="name" name="name" 
+                       value="{{ menu_item.name }}" required>
+            </div>
+
+            <!-- Price -->
+            <div class="mb-3">
+                <label for="price" class="form-label fw-bold">Price (₹)</label>
+                <input type="number" step="0.01" class="form-control" id="price" 
+                       name="price" value="{{ menu_item.price }}" required>
+            </div>
+
+            <!-- Availability -->
+            <div class="mb-3">
+                <label for="available" class="form-label fw-bold">Available</label>
+                <select class="form-select" id="available" name="available">
+                    <option value="1" {% if menu_item.is_available %}selected{% endif %}>Yes</option>
+                    <option value="0" {% if not menu_item.is_available %}selected{% endif %}>No</option>
+                </select>
+            </div>
+
+            <!-- Buttons -->
+            <div class="d-flex justify-content-between">
+                <a href="{{ url_for('restaurant_owner.menu_management', restaurant_id=restaurant.id) }}" 
+                   class="btn btn-secondary">Cancel</a>
+                <button type="submit" class="btn btn-success">💾 Save Changes</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

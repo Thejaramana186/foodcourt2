@@ -18,14 +18,20 @@ def dashboard():
     # Get assigned orders
     assigned_orders = order_dao.get_orders_by_delivery_person(user.id, status_filter='assigned')
     
+    # ✅ FIX: Fetch available orders (missing earlier)
+    available_orders = order_dao.get_available_orders_for_delivery()   # UPDATED
+    
     # Get recent deliveries
     recent_deliveries = order_dao.get_orders_by_delivery_person(user.id, page=1, per_page=10)
     
-    return render_template('delivery/dashboard.html',
-                         user=user,
-                         stats=stats,
-                         assigned_orders=assigned_orders,
-                         recent_deliveries=recent_deliveries)
+    return render_template(
+        'delivery/dashboard.html',
+        user=user,
+        stats=stats,
+        assigned_orders=assigned_orders,       # no `.items` so template can paginate if needed
+        available_orders=available_orders,     # UPDATED
+        recent_deliveries=recent_deliveries
+    )
 
 @delivery_bp.route('/orders')
 @login_required
@@ -35,7 +41,9 @@ def orders():
     page = request.args.get('page', 1, type=int)
     status_filter = request.args.get('status', '')
     
-    orders = order_dao.get_orders_by_delivery_person(user.id, page=page, per_page=15, status_filter=status_filter)
+    orders = order_dao.get_orders_by_delivery_person(
+        user.id, page=page, per_page=15, status_filter=status_filter
+    )
     
     return render_template('delivery/orders.html', orders=orders, status_filter=status_filter)
 
@@ -59,10 +67,12 @@ def accept_order(order_id):
     order = order_dao.get_order_by_id(order_id)
     
     if not order:
-        return jsonify({'error': 'Order not found'}), 404
+        flash("Order not found", "danger")   # ✅ Show flash message
+        return redirect(url_for('delivery.dashboard'))   # ✅ Redirect instead of JSON
     
     if order.status != 'ready_for_pickup' or order.delivery_person_id:
-        return jsonify({'error': 'Order not available for pickup'}), 400
+        flash("Order not available for pickup", "warning")   # ✅ Flash message
+        return redirect(url_for('delivery.dashboard'))   # ✅ Redirect
     
     # Assign delivery person
     order.delivery_person_id = user.id
@@ -70,9 +80,14 @@ def accept_order(order_id):
     order.pickup_at = datetime.utcnow()
     
     if order_dao.update_order(order):
-        return jsonify({'message': 'Order accepted successfully'})
+        flash("Order accepted successfully", "success")   # ✅ Flash message
     else:
-        return jsonify({'error': 'Failed to accept order'}), 500
+        flash("Failed to accept order", "danger")   # ✅ Flash message
+    
+    # ✅ Always redirect back to delivery dashboard
+    return redirect(url_for('delivery.dashboard'))
+
+
 
 @delivery_bp.route('/order/<int:order_id>/update_status', methods=['POST'])
 @login_required

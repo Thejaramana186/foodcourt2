@@ -1,111 +1,109 @@
-from flask import Blueprint, request, render_template, redirect, url_for, session, flash
-from dao.restaurant_dao import RestaurantDAO
-from dao.menu_dao import MenuDAO
+from flask import Blueprint, render_template, request
+from models.restaurant import Restaurant
+from models.menu import Menu
+from db import db
 
-public_bp = Blueprint('public', __name__)
-restaurant_dao = RestaurantDAO()
-menu_dao = MenuDAO()
+# Blueprint for all public-facing routes
+public_bp = Blueprint('public', __name__, url_prefix='/')
+
 
 @public_bp.route('/')
 def index():
-    # Get featured restaurants
-    featured_restaurants = restaurant_dao.get_featured_restaurants(limit=8)
-    
-    # Get popular cuisines
-    cuisines = restaurant_dao.get_all_cuisines()[:8]
-    
-    # Get some statistics for the homepage
-    stats = {
-        'total_restaurants': restaurant_dao.get_restaurant_count(),
-        'total_orders': 'Coming Soon',  # Would need proper implementation
-        'happy_customers': 'Coming Soon'
-    }
-    
-    return render_template('public/index.html', 
-                         restaurants=featured_restaurants, 
-                         cuisines=cuisines,
-                         stats=stats)
-
-@public_bp.route('/restaurants')
-def restaurants():
-    page = request.args.get('page', 1, type=int)
-    search = request.args.get('search', '')
-    cuisine = request.args.get('cuisine', '')
-    type_filter = request.args.get('type', '')
-    sort_by = request.args.get('sort', 'rating')
-    
-    restaurants = restaurant_dao.get_restaurants(
-        page=page,
-        per_page=12,
-        search=search,
-        cuisine=cuisine,
-        type_filter=type_filter,
-        sort_by=sort_by,
-        verified_only=True
+    """Home page showing featured restaurants"""
+    restaurants = (
+        Restaurant.query.filter_by(is_verified=True)
+        .order_by(Restaurant.id.desc())
+        .limit(6)
+        .all()
     )
-    
-    cuisines = restaurant_dao.get_all_cuisines()
-    
-    return render_template('public/restaurants.html',
-                         restaurants=restaurants,
-                         cuisines=cuisines,
-                         search=search,
-                         selected_cuisine=cuisine,
-                         selected_type=type_filter,
-                         sort_by=sort_by)
+    return render_template('public/index.html', restaurants=restaurants)
+
 
 @public_bp.route('/restaurant/<int:restaurant_id>')
 def restaurant_detail(restaurant_id):
-    restaurant = restaurant_dao.get_restaurant_by_id(restaurant_id)
-    
-    if not restaurant or not restaurant.is_active or not restaurant.is_verified:
-        return render_template('public/error.html', error="Restaurant not found"), 404
-    
-    # Get menu items
-    category = request.args.get('category', '')
-    type_filter = request.args.get('type', '')
-    
-    menus = menu_dao.get_menu_by_restaurant(restaurant_id, category, type_filter)
-    categories = menu_dao.get_categories_by_restaurant(restaurant_id)
-    
-    return render_template('public/restaurant_detail.html',
-                         restaurant=restaurant,
-                         menus=menus,
-                         categories=categories,
-                         selected_category=category,
-                         selected_type=type_filter)
+    """Restaurant detail page with menu"""
+    restaurant = Restaurant.query.get(restaurant_id)
 
-@public_bp.route('/search')
-def search():
-    query = request.args.get('q', '').strip()
-    page = request.args.get('page', 1, type=int)
-    
-    if not query:
-        return redirect(url_for('public.restaurants'))
-    
-    # Search restaurants
-    restaurants = restaurant_dao.search_restaurants(query, page=page, per_page=12)
-    
-    # Search menu items
-    menu_items = menu_dao.search_menu_items(query, page=1, per_page=20)
-    
-    return render_template('public/search_results.html',
-                         query=query,
-                         restaurants=restaurants,
-                         menu_items=menu_items)
+    if not restaurant:
+        return render_template(
+            'public/error.html',
+            error="Restaurant not found"
+        ), 404
 
-@public_bp.route('/about')
-def about():
-    return render_template('public/about.html')
+    menus = Menu.query.filter_by(restaurant_id=restaurant_id).all()
 
-@public_bp.route('/contact')
-def contact():
-    return render_template('public/contact.html')
+    return render_template(
+        'public/restaurant_detail.html',
+        restaurant=restaurant,
+        menus=menus
+    )
+
+
+@public_bp.route('/terms')
+def terms():
+    return render_template('public/terms.html')
+
+
 
 @public_bp.route('/privacy')
 def privacy():
     return render_template('public/privacy.html')
 
-@public_bp.route('/terms')
-def terms():
-    return render_template('public/terms.html')
+
+@public_bp.route('/about')
+def about():
+    """About page"""
+    return render_template('public/about.html')
+
+
+
+@public_bp.route('/contact')
+def contact():
+    return render_template('public/contact.html')
+
+
+@public_bp.route('/restaurants')
+def restaurants():
+    """List all verified restaurants"""
+    restaurants = (
+        Restaurant.query.filter_by(is_verified=True)
+        .order_by(Restaurant.name.asc())
+        .all()
+    )
+    return render_template('public/restaurants.html', restaurants=restaurants)
+
+
+@public_bp.route('/search')
+def search():
+    """Search restaurants by name, description, city, or cuisine"""
+    query = request.args.get('q', '').strip()
+    city = request.args.get('city', '').strip()
+    cuisine = request.args.get('cuisine', '').strip()
+
+    restaurants_query = Restaurant.query.filter_by(is_verified=True)
+
+    if query:
+        restaurants_query = restaurants_query.filter(
+            (Restaurant.name.ilike(f"%{query}%")) |
+            (Restaurant.description.ilike(f"%{query}%"))
+        )
+
+    if city:
+        restaurants_query = restaurants_query.filter(
+            Restaurant.city.ilike(city)
+        )
+
+    if cuisine:
+        restaurants_query = restaurants_query.filter(
+            Restaurant.cuisine.ilike(cuisine)
+        )
+
+    restaurants = restaurants_query.all()
+
+    return render_template(
+        'public/search_results.html',
+        restaurants=restaurants,
+        query=query,
+        city=city,
+        cuisine=cuisine
+    )

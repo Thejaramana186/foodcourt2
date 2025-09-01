@@ -1,119 +1,111 @@
-from flask import Blueprint, request, render_template, redirect, url_for, session, flash, jsonify
-from utils.auth import login_required, customer_required, get_current_user
+from flask import Blueprint, request, jsonify, current_app
+from db import db
 from models.cart import Cart
-from models.menu import Menu
-from dao.cart_dao import CartDAO
+from flask_login import current_user, login_required
 
-cart_bp = Blueprint('cart', __name__, url_prefix='/cart')
-cart_dao = CartDAO()
+cart_bp = Blueprint("cart", __name__)
 
+# ----------------------------
+# Count items in cart
+# ----------------------------
+@cart_bp.route("/count")
+@login_required
+def cart_count():
+    try:
+        count = Cart.query.filter_by(user_id=current_user.id).count()
+        return jsonify({"count": count})
+    except Exception as e:
+        current_app.logger.error(f"Cart Count Error: {str(e)}")
+        return jsonify({"error": str(e)}), 500
+
+
+# ----------------------------
+# Add item to cart
+# ----------------------------
 @cart_bp.route('/add', methods=['POST'])
 @login_required
-@customer_required
 def add_to_cart():
-    user = get_current_user()
-    data = request.get_json()
-    
-    menu_id = data.get('menu_id')
-    quantity = data.get('quantity', 1)
-    customization = data.get('customization', '')
-    
-    if not menu_id:
-        return jsonify({'error': 'Menu ID is required'}), 400
-    
-    if quantity <= 0:
-        return jsonify({'error': 'Quantity must be greater than 0'}), 400
-    
-    # Check if menu item exists and is available
-    menu_item = Menu.query.get(menu_id)
-    if not menu_item or not menu_item.is_available:
-        return jsonify({'error': 'Menu item not found or not available'}), 404
-    
-    # Check if restaurant is active and verified
-    if not menu_item.restaurant.is_active or not menu_item.restaurant.is_verified:
-        return jsonify({'error': 'Restaurant is currently unavailable'}), 400
-    
-    # Add to cart
-    cart_item = cart_dao.add_to_cart(user.id, menu_id, quantity, customization)
-    
-    if cart_item:
-        return jsonify({
-            'message': 'Item added to cart successfully',
-            'cart_item': cart_item.to_dict(),
-            'cart_count': cart_dao.get_cart_count(user.id)
-        })
-    else:
-        return jsonify({'error': 'Failed to add item to cart'}), 500
+    try:
+        data = request.get_json()
+        current_app.logger.debug(f"Cart Add Payload: {data}")
 
-@cart_bp.route('/update', methods=['POST'])
+        menu_id = data.get('menu_id')
+        quantity = data.get('quantity', 1)
+
+        if not menu_id:
+            return jsonify({"error": "menu_id is required"}), 400
+
+        cart_item = Cart(user_id=current_user.id, menu_id=menu_id, quantity=quantity)
+        db.session.add(cart_item)
+        db.session.commit()
+
+        return jsonify({"message": "Item added to cart successfully!"}), 201
+    except Exception as e:
+        db.session.rollback()
+        current_app.logger.error(f"Cart Add Error: {str(e)}")
+        return jsonify({"error": str(e)}), 500
+
+
+# ----------------------------
+# Update item quantity/customization
+# ----------------------------
+@cart_bp.route("/update", methods=["POST"])
 @login_required
-@customer_required
 def update_cart():
-    user = get_current_user()
     data = request.get_json()
-    
-    cart_id = data.get('cart_id')
-    quantity = data.get('quantity')
-    
-    if not cart_id or quantity is None:
-        return jsonify({'error': 'Cart ID and quantity are required'}), 400
-    
-    if quantity <= 0:
-        # Remove item from cart
-        if cart_dao.remove_from_cart(user.id, cart_id):
-            return jsonify({
-                'message': 'Item removed from cart',
-                'cart_count': cart_dao.get_cart_count(user.id)
-            })
-        else:
-            return jsonify({'error': 'Failed to remove item from cart'}), 500
-    else:
-        # Update quantity
-        cart_item = cart_dao.update_cart_quantity(user.id, cart_id, quantity)
-        if cart_item:
-            return jsonify({
-                'message': 'Cart updated successfully',
-                'cart_item': cart_item.to_dict(),
-                'cart_count': cart_dao.get_cart_count(user.id)
-            })
-        else:
-            return jsonify({'error': 'Failed to update cart'}), 500
+    if not data or "cart_id" not in data:
+        return jsonify({"error": "cart_id is required"}), 400
 
-@cart_bp.route('/remove', methods=['POST'])
+    cart_item = Cart.query.filter_by(id=data["cart_id"], user_id=current_user.id).first()
+    if not cart_item:
+        return jsonify({"error": "Cart item not found"}), 404
+
+    try:
+        cart_item.quantity = data.get("quantity", cart_item.quantity)
+        cart_item.customization = data.get("customization", getattr(cart_item, "customization", None))
+        db.session.commit()
+        return jsonify({"message": "Cart updated"}), 200
+    except Exception as e:
+        db.session.rollback()
+        current_app.logger.error(f"Cart Update Error: {str(e)}")
+        return jsonify({"error": str(e)}), 500
+
+
+# ----------------------------
+# Remove item from cart
+# ----------------------------
+@cart_bp.route("/remove", methods=["POST"])
 @login_required
-@customer_required
-def remove_from_cart():
-    user = get_current_user()
+def remove_cart():
     data = request.get_json()
-    
-    cart_id = data.get('cart_id')
-    
-    if not cart_id:
-        return jsonify({'error': 'Cart ID is required'}), 400
-    
-    if cart_dao.remove_from_cart(user.id, cart_id):
-        return jsonify({
-            'message': 'Item removed from cart successfully',
-            'cart_count': cart_dao.get_cart_count(user.id)
-        })
-    else:
-        return jsonify({'error': 'Failed to remove item from cart'}), 500
+    if not data or "cart_id" not in data:
+        return jsonify({"error": "cart_id is required"}), 400
 
-@cart_bp.route('/clear', methods=['POST'])
+    cart_item = Cart.query.filter_by(id=data["cart_id"], user_id=current_user.id).first()
+    if not cart_item:
+        return jsonify({"error": "Cart item not found"}), 404
+
+    try:
+        db.session.delete(cart_item)
+        db.session.commit()
+        return jsonify({"message": "Cart item removed"}), 200
+    except Exception as e:
+        db.session.rollback()
+        current_app.logger.error(f"Cart Remove Error: {str(e)}")
+        return jsonify({"error": str(e)}), 500
+
+
+# ----------------------------
+# Clear entire cart
+# ----------------------------
+@cart_bp.route("/clear", methods=["POST"])
 @login_required
-@customer_required
 def clear_cart():
-    user = get_current_user()
-    
-    if cart_dao.clear_cart(user.id):
-        return jsonify({'message': 'Cart cleared successfully'})
-    else:
-        return jsonify({'error': 'Failed to clear cart'}), 500
-
-@cart_bp.route('/count')
-@login_required
-@customer_required
-def cart_count():
-    user = get_current_user()
-    count = cart_dao.get_cart_count(user.id)
-    return jsonify({'count': count})
+    try:
+        Cart.query.filter_by(user_id=current_user.id).delete()
+        db.session.commit()
+        return jsonify({"message": "Cart cleared"}), 200
+    except Exception as e:
+        db.session.rollback()
+        current_app.logger.error(f"Cart Clear Error: {str(e)}")
+        return jsonify({"error": str(e)}), 500

@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shopping Cart - FoodieHub</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-50">
+    <!-- Navigation -->
+    <nav class="bg-white shadow-xl sticky top-0 z-50 border-b border-gray-100">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-20">
+                <div class="flex items-center space-x-8">
+                    <a href="{{ url_for('customer.dashboard') }}" class="flex items-center space-x-3">
+                        <div class="w-12 h-12 bg-gradient-to-br from-red-500 via-orange-500 to-pink-500 rounded-2xl flex items-center justify-center shadow-lg">
+                            <i class="fas fa-utensils text-white text-xl"></i>
+                        </div>
+                        <span class="text-3xl font-black bg-gradient-to-r from-red-500 to-pink-500 bg-clip-text text-transparent">FoodieHub</span>
+                    </a>
+                    
+                    <div class="hidden md:flex items-center space-x-6">
+                        <a href="{{ url_for('customer.dashboard') }}" class="text-gray-700 hover:text-red-600 font-medium transition duration-300">Dashboard</a>
+                        <a href="{{ url_for('customer.restaurants') }}" class="text-gray-700 hover:text-red-600 font-medium transition duration-300">Restaurants</a>
+                        <a href="{{ url_for('customer.cart') }}" class="text-red-600 font-semibold border-b-2 border-red-500 pb-1">Cart</a>
+                        <a href="{{ url_for('customer.orders') }}" class="text-gray-700 hover:text-red-600 font-medium transition duration-300">Orders</a>
+                    </div>
+                </div>
+                
+                <div class="flex items-center space-x-4">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
+                            <i class="fas fa-user text-white"></i>
+                        </div>
+                        <div>
+                            <p class="font-semibold text-gray-900">{{ current_user.get_full_name() if current_user else 'Guest' }}</p>
+                            <p class="text-xs text-gray-500">Customer</p>
+                        </div>
+                    </div>
+                    
+                    <a href="{{ url_for('auth.logout') }}" class="text-gray-500 hover:text-red-600 transition duration-300">
+                        <i class="fas fa-sign-out-alt text-xl"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div class="fixed top-24 right-4 z-50 space-y-3">
+                {% for category, message in messages %}
+                    <div class="px-6 py-4 rounded-2xl shadow-xl {% if category == 'success' %}bg-green-500{% elif category == 'error' %}bg-red-500{% else %}bg-blue-500{% endif %} text-white max-w-sm">
+                        <div class="flex items-center space-x-3">
+                            <i class="fas fa-{% if category == 'success' %}check-circle{% elif category == 'error' %}exclamation-circle{% else %}info-circle{% endif %} text-xl"></i>
+                            <span class="font-semibold">{{ message }}</span>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div class="text-center mb-8">
+            <h1 class="text-4xl font-bold text-gray-900 mb-4">Your Shopping Cart</h1>
+            <p class="text-xl text-gray-600">Review your items before checkout</p>
+        </div>
+        
+        {% if cart_items %}
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- Cart Items -->
+            <div class="lg:col-span-2">
+                {% for restaurant_id, restaurant_data in restaurants.items() %}
+                <div class="bg-white rounded-2xl shadow-lg overflow-hidden mb-6">
+                    <div class="p-6 border-b border-gray-200 bg-gradient-to-r from-red-50 to-orange-50">
+                        <div class="flex items-center space-x-4">
+                            <img src="{{ restaurant_data.restaurant.image }}" alt="{{ restaurant_data.restaurant.name }}" 
+                                 class="w-16 h-16 rounded-xl object-cover">
+                            <div>
+                                <h2 class="text-2xl font-bold text-gray-900">{{ restaurant_data.restaurant.name }}</h2>
+                                <p class="text-gray-600">{{ restaurant_data.restaurant.cuisine }}</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="divide-y divide-gray-200">
+                        {% for item in restaurant_data["items"] %}
+                        <div class="p-6 hover:bg-gray-50 transition duration-200" id="cart-item-{{ item.id }}">
+                            <div class="flex items-center space-x-4">
+                                <!-- Food Type Indicator -->
+                                <div class="flex-shrink-0">
+                                    {% if item.menu.type == 'veg' %}
+                                        <div class="w-6 h-6 bg-green-500 rounded border-2 border-green-600 flex items-center justify-center">
+                                            <div class="w-2 h-2 bg-white rounded-full"></div>
+                                        </div>
+                                    {% else %}
+                                        <div class="w-6 h-6 bg-red-500 rounded border-2 border-red-600 flex items-center justify-center">
+                                            <div class="w-2 h-2 bg-white rounded-full"></div>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                
+                                <!-- Item Details -->
+                                <div class="flex-1">
+                                    <h3 class="text-lg font-semibold text-gray-900">{{ item.menu.name }}</h3>
+                                    <p class="text-gray-600 text-sm">{{ item.menu.description }}</p>
+                                    <div class="flex items-center space-x-4 mt-2">
+                                        <span class="text-lg font-bold text-orange-600">₹{{ "%.0f"|format(item.menu.get_effective_price()) }}</span>
+                                    </div>
+                                </div>
+                                
+                                <!-- Quantity Controls -->
+                                <div class="flex items-center space-x-3">
+                                    <button onclick="updateQuantity({{ item.id }}, {{ item.quantity - 1 }})" 
+                                            class="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center hover:bg-gray-300 transition duration-200">
+                                        <i class="fas fa-minus text-xs"></i>
+                                    </button>
+                                    <span class="w-8 text-center font-semibold">{{ item.quantity }}</span>
+                                    <button onclick="updateQuantity({{ item.id }}, {{ item.quantity + 1 }})" 
+                                            class="w-8 h-8 bg-gray-200 text-gray-700 rounded-full flex items-center justify-center hover:bg-orange-600 transition duration-200">
+                                        <i class="fas fa-plus text-xs"></i>
+                                    </button>
+                                </div>
+                                
+                                <!-- Item Total -->
+                                <div class="text-right">
+                                    <p class="text-lg font-bold text-gray-900">₹{{ "%.0f"|format(item.get_total_price()) }}</p>
+                                    <button onclick="removeItem({{ item.id }})" 
+                                            class="text-red-500 hover:text-red-700 text-sm mt-1">
+                                        <i class="fas fa-trash mr-1"></i>Remove
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    
+                    <div class="p-6 bg-gray-50 border-t border-gray-200">
+                        <div class="flex justify-between items-center">
+                            <span class="text-lg font-semibold text-gray-900">Restaurant Subtotal:</span>
+                            <span class="text-xl font-bold text-orange-600">₹{{ "%.0f"|format(restaurant_data.subtotal) }}</span>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            
+            <!-- Order Summary -->
+            <div class="lg:col-span-1">
+                <div class="bg-white rounded-2xl shadow-lg p-6 sticky top-4">
+                    <h3 class="text-xl font-bold text-gray-900 mb-6">Order Summary</h3>
+                    
+                    <div class="space-y-4 mb-6">
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Subtotal</span>
+                            <span class="font-semibold">₹{{ "%.0f"|format(total) }}</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Delivery Fee</span>
+                            <span class="font-semibold text-green-600">Free</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Taxes & Fees</span>
+                            <span class="font-semibold">₹{{ "%.0f"|format(total * 0.05) }}</span>
+                        </div>
+                        <div class="border-t pt-4">
+                            <div class="flex justify-between text-lg font-bold">
+                                <span>Total</span>
+                                <span class="text-orange-600">₹{{ "%.0f"|format(total * 1.05) }}</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <a href="{{ url_for('checkout.checkout') }}" 
+                       class="w-full bg-gradient-to-r from-red-500 via-orange-500 to-pink-500 text-white py-4 rounded-xl font-semibold hover:shadow-lg transform hover:scale-105 transition duration-300 text-center block">
+                        <i class="fas fa-credit-card mr-2"></i>Proceed to Checkout
+                    </a>
+                    
+                    <a href="{{ url_for('customer.restaurants') }}" 
+                       class="w-full border-2 border-gray-300 text-gray-700 py-3 rounded-xl font-semibold hover:border-red-500 hover:text-red-500 transition duration-200 text-center block mt-3">
+                        <i class="fas fa-plus mr-2"></i>Add More Items
+                    </a>
+                    
+                    <button onclick="clearCart()" 
+                            class="w-full text-red-600 hover:text-red-700 py-3 font-medium transition duration-200 mt-3">
+                        <i class="fas fa-trash mr-2"></i>Clear Cart
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        {% else %}
+        <!-- Empty Cart -->
+        <div class="text-center py-16">
+            <div class="w-32 h-32 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-8">
+                <i class="fas fa-shopping-cart text-gray-400 text-4xl"></i>
+            </div>
+            <h2 class="text-3xl font-bold text-gray-900 mb-4">Your cart is empty</h2>
+            <p class="text-xl text-gray-600 mb-8">Looks like you haven't added any items to your cart yet</p>
+            <a href="{{ url_for('customer.restaurants') }}" 
+               class="bg-gradient-to-r from-red-500 via-orange-500 to-pink-500 text-white px-8 py-4 rounded-xl font-semibold text-lg hover:shadow-lg transform hover:scale-105 transition duration-300 inline-block">
+                <i class="fas fa-search mr-2"></i>Start Shopping
+            </a>
+        </div>
+        {% endif %}
+    </main>
+
+    <script>
+    function addToCart(menuId, quantity) {
+    fetch("/cart/add", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            menu_id: menuId,
+            quantity: quantity
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert("Item added to cart!");
+            location.reload();
+        } else {
+            alert("❌ " + data.message);
+        }
+    })
+    .catch(err => {
+        console.error(err);
+        alert("❌ Failed to add item to cart");
+    });
+}
+    
+
+
+
+
+
+    function updateQuantity(cartId, newQuantity) {
+        if (newQuantity <= 0) {
+            removeItem(cartId);
+            return;
+        }
+        
+        fetch('/cart/update', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ cart_id: cartId, quantity: newQuantity })
+        })
+        .then(response => response.json())
+        .then(data => data.message ? location.reload() : alert(data.error || 'Failed to update cart'))
+        .catch(() => alert('Failed to update cart'));
+    }
+
+    function removeItem(cartId) {
+        if (confirm('Are you sure you want to remove this item?')) {
+            fetch('/cart/remove', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ cart_id: cartId })
+            })
+            .then(response => response.json())
+            .then(data => data.message ? location.reload() : alert(data.error || 'Failed to remove item'))
+            .catch(() => alert('Failed to remove item'));
+        }
+    }
+
+    function clearCart() {
+        if (confirm('Are you sure you want to clear your entire cart?')) {
+            fetch('/cart/clear', { method: 'POST', headers: { 'Content-Type': 'application/json' } })
+            .then(response => response.json())
+            .then(data => data.message ? location.reload() : alert(data.error || 'Failed to clear cart'))
+            .catch(() => alert('Failed to clear cart'));
+        }
+    }
+
+    // Auto-hide flash messages
+    setTimeout(() => {
+        document.querySelectorAll('.fixed > div').forEach(alert => {
+            alert.style.transform = 'translateX(100%)';
+            alert.style.opacity = '0';
+            setTimeout(() => alert.remove(), 300);
+        });
+    }, 5000);
+    </script>
+</body>
+</html>

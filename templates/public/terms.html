@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Terms of Service - FoodieHub</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-50 text-gray-900">
+  <div class="max-w-3xl mx-auto py-12 px-6">
+    <h1 class="text-3xl font-bold text-red-600 mb-6">Terms of Service</h1>
+    <p class="mb-4">By using FoodieHub, you agree to the following terms and conditions:</p>
+    <ul class="list-disc pl-6 space-y-2">
+      <li>All food orders are subject to availability from restaurants.</li>
+      <li>Payments are processed securely through our platform.</li>
+      <li>Refunds and cancellations follow restaurant policies.</li>
+      <li>We are not responsible for delays caused by external factors (traffic, weather, etc.).</li>
+    </ul>
+    <a href="{{ url_for('public.index') }}" class="mt-6 inline-block text-red-600 hover:underline">← Back to Home</a>
+  </div>
+</body>
+</html>

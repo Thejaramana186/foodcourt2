@@ -1,8 +1,10 @@
 from db import db
 from datetime import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
+from flask_login import UserMixin
 
-class User(db.Model):
+
+class User(UserMixin, db.Model):
     __tablename__ = 'users'
     
     id = db.Column(db.Integer, primary_key=True)
@@ -14,34 +16,54 @@ class User(db.Model):
     phone = db.Column(db.String(20), nullable=True)
     address = db.Column(db.Text, nullable=True)
     city = db.Column(db.String(50), nullable=True)
-    role = db.Column(db.String(20), nullable=False, default='customer')  # customer, restaurant_owner, delivery_person, admin
+    role = db.Column(
+        db.String(20), 
+        nullable=False, 
+        default='customer'  # customer, restaurant_owner, delivery_person, admin
+    )
     is_active = db.Column(db.Boolean, default=True)
     is_verified = db.Column(db.Boolean, default=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     last_login = db.Column(db.DateTime, nullable=True)
     
     # Relationships
-    carts = db.relationship('Cart', backref='user', lazy=True, cascade='all, delete-orphan')
-
-    # Orders placed by this user
-    orders = db.relationship(
-        'Order',
-        foreign_keys='Order.user_id',
-        backref='customer',
-        lazy=True,
-        cascade='all, delete-orphan'
+    carts = db.relationship(
+        'Cart', backref='user', lazy=True, cascade='all, delete-orphan'
     )
 
+    # Orders placed by this user (as a customer)
+    customer_orders = db.relationship(
+        "Order",
+        foreign_keys="Order.customer_id",
+        back_populates="customer",
+        
+    )
+
+    # Orders delivered by this user (as a delivery person)
+    delivery_orders = db.relationship(
+        "Order",
+        foreign_keys="Order.delivery_person_id",
+        back_populates="delivery_person",
+        
+    )
+
+
+    
     # Restaurants owned by this user
     restaurants = db.relationship('Restaurant', backref='owner', lazy=True)
-
-    # Orders delivered by this user
-    deliveries = db.relationship(
-        'Order',
-        foreign_keys='Order.delivery_person_id',
-        backref='delivery_person',
-        lazy=True
-    )
+    
+    # Flask-Login required methods (UserMixin provides defaults, but we can override)
+    def get_id(self):
+        return str(self.id)
+    
+    def is_authenticated(self):
+        return True
+    
+    def is_active_user(self):
+        return self.is_active
+    
+    def is_anonymous(self):
+        return False
     
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
@@ -82,4 +104,4 @@ class User(db.Model):
         }
     
     def __repr__(self):
-        return f'<User {self.username}>'
+        return f'<User {self.name} ({self.role})>'

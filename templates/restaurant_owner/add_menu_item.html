@@ -1,0 +1,34 @@
+{% extends "restaurant_owner/base.html" %}
+
+{% block title %}Add Menu Item{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Add Menu Item for {{ restaurant.name }}</h2>
+    
+    <form method="POST" action="{{ url_for('restaurant_owner.add_menu_item', restaurant_id=restaurant.id) }}">
+        <div class="mb-3">
+            <label class="form-label">Dish Name</label>
+            <input type="text" name="name" class="form-control" required>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Description</label>
+            <textarea name="description" class="form-control" rows="3"></textarea>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Price</label>
+            <input type="number" step="0.01" name="price" class="form-control" required>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Category</label>
+            <input type="text" name="category" class="form-control">
+        </div>
+
+        <button type="submit" class="btn btn-success">Add Item</button>
+        <a href="{{ url_for('restaurant_owner.menu_management', restaurant_id=restaurant.id) }}" class="btn btn-secondary">Cancel</a>
+    </form>
+</div>
+{% endblock %}

@@ -1,0 +1,46 @@
+{% extends "layouts/base.html" %}
+{% block content %}
+<div class="container mt-4">
+    <h2 class="fw-bold">Available Orders</h2>
+    <p class="text-muted">Select an order to deliver 🚴</p>
+
+    {% if orders.items %}
+        {% for order in orders.items %}
+            <div class="card mt-3 shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">Order #{{ order.id }}</h5>
+                    <p><strong>Restaurant:</strong> {{ order.restaurant.restaurantname }}</p>
+                    <p><strong>Customer:</strong> {{ order.user.username }}</p>
+                    <p><strong>Total:</strong> ₹{{ order.total_amount }}</p>
+                    <p><strong>Status:</strong> {{ order.status }}</p>
+
+                    <form method="post" action="{{ url_for('delivery.assign_order') }}">
+                        <input type="hidden" name="order_id" value="{{ order.id }}">
+                        <button type="submit" class="btn btn-primary">Take this Order</button>
+                    </form>
+                </div>
+            </div>
+        {% endfor %}
+
+        <!-- Pagination -->
+        <nav class="mt-4">
+            <ul class="pagination">
+                {% if orders.has_prev %}
+                    <li class="page-item">
+                        <a class="page-link" href="{{ url_for('delivery.available_orders', page=orders.prev_num) }}">Previous</a>
+                    </li>
+                {% endif %}
+                {% if orders.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="{{ url_for('delivery.available_orders', page=orders.next_num) }}">Next</a>
+                    </li>
+                {% endif %}
+            </ul>
+        </nav>
+    {% else %}
+        <div class="alert alert-info mt-3">
+            No available orders right now 🚫
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

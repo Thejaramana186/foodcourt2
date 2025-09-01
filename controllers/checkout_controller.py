@@ -111,7 +111,7 @@ def place_order():
         
         # Create order
         order = Order(
-            user_id=user.id,
+            customer_id=user.id,
             restaurant_id=restaurant_id,
             total_amount=total_amount,
             delivery_fee=delivery_fee,

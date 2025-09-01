@@ -1,0 +1,42 @@
+{% extends "restaurant_owner/base.html" %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2>Menu Management - {{ restaurant.name }}</h2>
+
+    <!-- Add new item -->
+    <a href="{{ url_for('restaurant_owner.add_menu_item', restaurant_id=restaurant.id) }}" 
+       class="btn btn-success mb-3">+ Add Menu Item</a>
+
+    <!-- Menu items table -->
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Item Name</th>
+                <th>Price</th>
+                <th>Available</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for item in menus %}
+            <tr>
+                <td>{{ item.name }}</td>
+                <td>₹{{ item.price }}</td>
+                <td>{{ "Yes" if item.is_available else "No" }}</td>
+                <td>
+                    <a href="{{ url_for('restaurant_owner.edit_menu_item', restaurant_id=restaurant.id, item_id=item.id) }}" class="btn btn-warning btn-sm">Edit</a>
+                    <form action="{{ url_for('restaurant_owner.delete_menu_item', restaurant_id=restaurant.id, item_id=item.id) }}" method="POST" style="display:inline;">
+    <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+</form>
+                </td>
+            </tr>
+        {% else %}
+            <tr>
+                <td colspan="4" class="text-center">No menu items found.</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

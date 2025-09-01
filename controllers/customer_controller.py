@@ -94,6 +94,33 @@ def cart():
                          restaurants=restaurants,
                          total=total)
 
+
+
+
+@customer_bp.route('/cart/add', methods=['POST'])
+@login_required
+@customer_required
+def add_to_cart():
+    user = get_current_user()
+    data = request.get_json(force=True)
+
+    if not data:
+        return jsonify({"error": "Invalid JSON"}), 400
+
+    menu_id = data.get("menu_id")
+    quantity = data.get("quantity", 1)
+
+    if not menu_id:
+        return jsonify({"error": "menu_id is required"}), 400
+
+    success = cart_dao.add_to_cart(user.id, menu_id, quantity)
+
+    if success:
+        return jsonify({"message": "Added to cart"})
+    else:
+        return jsonify({"error": "Failed to add to cart"}), 500
+
+
 @customer_bp.route('/orders')
 @login_required
 @customer_required
@@ -113,7 +140,7 @@ def order_detail(order_id):
     user = get_current_user()
     order = order_dao.get_order_by_id(order_id)
     
-    if not order or order.user_id != user.id:
+    if not order or order.customer_id != user.id:
         flash('Order not found', 'error')
         return redirect(url_for('customer.orders'))
     

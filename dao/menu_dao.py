@@ -2,6 +2,8 @@ from db import db
 from models.menu import Menu
 from models.restaurant import Restaurant
 from sqlalchemy import and_, or_, desc
+from datetime import datetime
+
 
 class MenuDAO:
     def create_menu(self, menu):
@@ -47,28 +49,34 @@ class MenuDAO:
         ).distinct().all()
         return [category[0] for category in categories if category[0]]
     
-    def update_menu(self, menu):
+    def update_menu(self, menu_item):
         try:
-            menu.updated_at = datetime.utcnow()
+            menu_item.updated_at = datetime.utcnow()
             db.session.commit()
-            return menu
+            return menu_item
         except Exception as e:
             db.session.rollback()
             print(f"Error updating menu: {e}")
             return None
     
-    def delete_menu(self, menu_id):
+    def delete_menu(self, menu_item):
         try:
-            menu = Menu.query.get(menu_id)
-            if menu:
-                menu.is_available = False
-                db.session.commit()
-                return True
-            return False
+        # If we received a Menu object, use it directly
+          if isinstance(menu_item, Menu):
+            menu = menu_item
+          else:
+            menu = Menu.query.get(menu_item)  # assume it's an ID
+
+          if menu:
+            menu.is_available = False   # soft delete
+            db.session.commit()
+            return True
+          return False
         except Exception as e:
-            db.session.rollback()
-            print(f"Error deleting menu: {e}")
-            return False
+         db.session.rollback()
+        print(f"Error deleting menu: {e}")
+        return False
+
     
     def search_menu_items(self, search_term, page=1, per_page=20):
         query = Menu.query.join(Restaurant).filter(
