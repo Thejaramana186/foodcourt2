@@ -1,11 +1,14 @@
 import os
 
+basedir = os.path.abspath(os.path.dirname(__file__))
+
 class Config:
     # Security
     SECRET_KEY = os.environ.get('SECRET_KEY') or 'your-super-secret-key-change-in-production'
     
-    # Database
-    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or 'sqlite:///fooddelivery_auth.db'
+    # Database (use instance folder for SQLite)
+    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or \
+        'sqlite:///' + os.path.join(basedir, 'instance', 'fooddelivery_auth.db')
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     SQLALCHEMY_ENGINE_OPTIONS = {
         'pool_recycle': 300,
